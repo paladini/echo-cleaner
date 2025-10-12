@@ -1,0 +1,10 @@
+# Echo Clear - Project Dependencies
+
+# UI Framework
+PySide6>=6.6.0
+
+# System utilities
+psutil>=5.9.0
+
+# For disk space analysis
+humanize>=4.9.0

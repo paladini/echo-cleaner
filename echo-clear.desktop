@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Echo Clear
+Comment=Intelligent System Cleaner for Linux
+Exec=/usr/bin/python3 %D/app/main.py
+Icon=%D/app/assets/icon.png
+Terminal=false
+Categories=System;Utility;
+Keywords=clean;cleaner;cache;disk;space;docker;
+StartupNotify=true
