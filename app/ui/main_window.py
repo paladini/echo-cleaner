@@ -2,6 +2,7 @@
 Main Window UI Component
 """
 
+from typing import List, Dict
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
     QPushButton, QLabel, QListWidget, QListWidgetItem,
@@ -9,6 +10,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
+from .subcategory_widget import SubcategoryGroupWidget, ItemCheckboxWidget
+from services.subcategory_service import SubcategoryService
 
 
 class MainWindow(QMainWindow):
@@ -22,6 +25,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.scan_results = None
         self.selected_items = {}
+        self.subcategory_service = SubcategoryService()
         self.init_ui()
         self.apply_styles()
     
@@ -492,11 +496,11 @@ class MainWindow(QMainWindow):
             
             #subcategoryHeader {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 rgba(0, 122, 255, 0.1),
-                    stop:1 rgba(0, 122, 255, 0.03));
-                border-left: 4px solid #007aff;
-                border-radius: 10px;
-                margin: 10px 0px 6px 0px;
+                    stop:0 rgba(0, 122, 255, 0.08),
+                    stop:1 rgba(0, 122, 255, 0.02));
+                border-left: 3px solid #007aff;
+                border-radius: 8px;
+                margin: 8px 0px 4px 0px;
             }
             
             #subcategoryName {
@@ -505,11 +509,13 @@ class MainWindow(QMainWindow):
             }
             
             #subcategoryCount {
-                color: #007aff;
-                background-color: rgba(0, 122, 255, 0.15);
-                padding: 6px 16px;
-                border-radius: 14px;
+                color: #ffffff;
+                background-color: #007aff;
+                padding: 4px 12px;
+                border-radius: 13px;
                 font-weight: 500;
+                min-width: 70px;
+                max-height: 26px;
             }
             
             #itemName {
@@ -776,7 +782,7 @@ class MainWindow(QMainWindow):
                     value_labels[0].setText(str(categories_count))
     
     def update_category_view(self, category_name, items):
-        """Update a category view with scan results - organized by subcategory"""
+        """Update a category view with scan results - using new component architecture"""
         if category_name not in self.category_views:
             return
         
@@ -804,141 +810,86 @@ class MainWindow(QMainWindow):
         else:
             info_label.setVisible(False)
             
-            # Group items by subcategory
-            subcategories = {}
-            for item_data in items:
-                subcat = item_data.get('subcategory', 'General')
-                if subcat not in subcategories:
-                    subcategories[subcat] = []
-                subcategories[subcat].append(item_data)
-            
-            # If only one subcategory (or no subcategories), show items directly
-            if len(subcategories) <= 1:
-                idx = 0
-                for item_data in items:
-                    item_widget = self.create_item_checkbox(category_name, idx, item_data)
-                    layout.addWidget(item_widget)
-                    
-                    # Select by default
-                    self.selected_items[category_name][idx] = {
-                        'selected': True,
-                        'data': item_data
-                    }
-                    idx += 1
+            # Check if items have subcategories using the service
+            if self.subcategory_service.has_subcategories(items):
+                # Render with subcategory groups
+                self._render_with_subcategories(category_name, items, layout)
             else:
-                # Show subcategory headers and items
-                idx = 0
-                for subcat_name in sorted(subcategories.keys()):
-                    subcat_items = subcategories[subcat_name]
-                    
-                    # Subcategory header
-                    subcat_header = self.create_subcategory_header(subcat_name, len(subcat_items))
-                    layout.addWidget(subcat_header)
-                    
-                    # Items in subcategory
-                    for item_data in subcat_items:
-                        item_widget = self.create_item_checkbox(category_name, idx, item_data)
-                        layout.addWidget(item_widget)
-                        
-                        # Select by default
-                        self.selected_items[category_name][idx] = {
-                            'selected': True,
-                            'data': item_data
-                        }
-                        idx += 1
-                    
-                    # Add spacing between subcategories
-                    spacing_widget = QWidget()
-                    spacing_widget.setFixedHeight(10)
-                    layout.addWidget(spacing_widget)
+                # Render without subcategories (legacy mode)
+                self._render_without_subcategories(category_name, items, layout)
             
             layout.addStretch()
         
         self.update_selection_summary()
     
-    def create_subcategory_header(self, subcat_name, item_count):
-        """Create a subcategory header widget"""
-        header_frame = QFrame()
-        header_frame.setObjectName("subcategoryHeader")
-        header_frame.setMinimumHeight(50)
-        header_frame.setMaximumHeight(50)
+    def _render_with_subcategories(self, category_name: str, items: List[Dict], layout):
+        """Render items organized by subcategories using new components"""
+        grouped_items = self.subcategory_service.group_items_by_subcategory(items)
         
-        header_layout = QHBoxLayout(header_frame)
-        header_layout.setContentsMargins(18, 12, 18, 12)
-        
-        # Icon and name
-        name_label = QLabel(f"📂 {subcat_name}")
-        name_label.setObjectName("subcategoryName")
-        name_font = QFont("Inter", 14, QFont.DemiBold)
-        name_label.setFont(name_font)
-        header_layout.addWidget(name_label)
-        
-        header_layout.addStretch()
-        
-        # Item count badge
-        count_text = f"{item_count} item" if item_count == 1 else f"{item_count} items"
-        count_label = QLabel(count_text)
-        count_label.setObjectName("subcategoryCount")
-        count_font = QFont("Inter", 12, QFont.Medium)
-        count_label.setFont(count_font)
-        header_layout.addWidget(count_label)
-        
-        return header_frame
+        idx = 0
+        for subcat_name in sorted(grouped_items.keys()):
+            subcat_items = grouped_items[subcat_name]
+            
+            # Create subcategory group widget
+            def make_id_generator(base_idx):
+                return lambda item_idx: f"{category_name}_{base_idx + item_idx}"
+            
+            group_widget = SubcategoryGroupWidget(
+                subcategory_name=subcat_name,
+                items=subcat_items,
+                category_name=category_name,
+                item_id_generator=make_id_generator(idx)
+            )
+            
+            # Connect selection changes and store items
+            for item_idx, item_widget in enumerate(group_widget.item_widgets):
+                global_idx = idx + item_idx
+                self.selected_items[category_name][global_idx] = {
+                    'selected': True,
+                    'data': item_widget.item_data
+                }
+                
+                # Connect signal to update selection
+                item_widget.selection_changed.connect(
+                    lambda checked, cat=category_name, gidx=global_idx: 
+                    self._on_item_selection_changed_new(cat, gidx, checked)
+                )
+            
+            layout.addWidget(group_widget)
+            idx += len(subcat_items)
     
-    def create_item_checkbox(self, category_name, item_idx, item_data):
-        """Create a checkbox item widget"""
-        item_frame = QFrame()
-        item_frame.setObjectName("itemCheckboxFrame")
-        item_frame.setMinimumHeight(70)
-        item_frame.setMaximumHeight(100)
-        
-        item_layout = QHBoxLayout(item_frame)
-        item_layout.setContentsMargins(15, 12, 15, 12)
-        
-        # Checkbox
-        checkbox = QCheckBox()
-        checkbox.setObjectName(f"checkbox_{category_name}_{item_idx}")
-        checkbox.setChecked(True)  # Selected by default
-        checkbox.setCursor(Qt.PointingHandCursor)
-        checkbox.stateChanged.connect(lambda state: self.on_item_selection_changed(category_name, item_idx, state == Qt.Checked))
-        item_layout.addWidget(checkbox)
-        
-        # Item info
-        info_layout = QVBoxLayout()
-        info_layout.setSpacing(5)
-        
-        name = item_data.get('name', 'Unknown')
-        name_label = QLabel(name)
-        name_label.setObjectName("itemName")
-        name_label.setWordWrap(False)
-        name_font = QFont("Inter", 12, QFont.Medium)
-        name_label.setFont(name_font)
-        info_layout.addWidget(name_label)
-        
-        # Details
-        size = item_data.get('size', 0)
-        size_str = self.format_size(size)
-        path = item_data.get('path', '')
-        
-        details_label = QLabel(f"{size_str}")
-        if path and len(path) < 100:
-            details_label.setText(f"{size_str} • {path}")
-        
-        details_label.setObjectName("itemDetails")
-        details_label.setWordWrap(False)
-        details_font = QFont("Inter", 10)
-        details_label.setFont(details_font)
-        info_layout.addWidget(details_label)
-        
-        item_layout.addLayout(info_layout, 1)
-        
-        return item_frame
+    def _render_without_subcategories(self, category_name: str, items: List[Dict], layout):
+        """Render items without subcategory grouping (legacy mode)"""
+        for idx, item_data in enumerate(items):
+            item_id = f"{category_name}_{idx}"
+            item_widget = ItemCheckboxWidget(item_data, item_id)
+            
+            # Store selection state
+            self.selected_items[category_name][idx] = {
+                'selected': True,
+                'data': item_data
+            }
+            
+            # Connect selection change
+            item_widget.selection_changed.connect(
+                lambda checked, cat=category_name, i=idx: 
+                self._on_item_selection_changed_new(cat, i, checked)
+            )
+            
+            layout.addWidget(item_widget)
     
-    def on_item_selection_changed(self, category_name, item_idx, is_checked):
-        """Handle individual item selection change"""
+    def _on_item_selection_changed_new(self, category_name: str, item_idx: int, is_checked: bool):
+        """Handle item selection change from new components"""
         if category_name in self.selected_items and item_idx in self.selected_items[category_name]:
             self.selected_items[category_name][item_idx]['selected'] = is_checked
             self.update_selection_summary()
+    
+    # Legacy methods - kept for backward compatibility if needed
+    # These are now replaced by SubcategoryGroupWidget and ItemCheckboxWidget
+    
+    def on_item_selection_changed(self, category_name, item_idx, is_checked):
+        """Legacy method - redirects to new implementation"""
+        self._on_item_selection_changed_new(category_name, item_idx, is_checked)
     
     def toggle_select_all(self, category_name):
         """Toggle select all items in a category"""
