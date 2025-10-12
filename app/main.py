@@ -7,6 +7,7 @@ from PySide6.QtWidgets import QApplication, QMessageBox
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
 from ui.main_window import MainWindow
+from ui.custom_dialog import CustomDialog, ConfirmDialog
 from services.cleaning_service import CleaningService
 from modules import (
     SystemCacheCleaner,
@@ -114,16 +115,21 @@ class EchoClearApp:
         # Show clean button if there's something to clean
         if total_size > 0:
             self.window.show_clean_button(visible=True)
-            self.show_info_message(
-                "Scan Complete",
-                f"Found {size_formatted} of reclaimable space across {len(categories)} categories.\n\n"
-                "Review and select items in each category, then click 'Clean Selected Items' on the Dashboard."
+            self.show_custom_dialog(
+                "Scan Complete! 🔍",
+                f"Found <b>{size_formatted}</b> of reclaimable space across <b>{len(categories)} categories</b>.<br><br>"
+                "<b>Next steps:</b><br>"
+                "• Review and select items in each category<br>"
+                "• Click 'Clean Selected Items' when ready<br><br>"
+                "<span style='color: #86868b;'>All items are selected by default for your convenience.</span>",
+                icon_type="search"
             )
         else:
             self.window.show_clean_button(visible=False)
-            self.show_info_message(
-                "Scan Complete",
-                "Your system is already clean! No items found to clean."
+            self.show_custom_dialog(
+                "Scan Complete! ✨",
+                "Your system is already clean!\n\nNo items found that need cleaning.",
+                icon_type="success"
             )
     
     def on_scan_failed(self, error_message):
@@ -179,19 +185,18 @@ class EchoClearApp:
         # Confirm cleaning
         size_formatted = self.service.format_size(total_size)
         
-        reply = QMessageBox.question(
+        dialog = ConfirmDialog(
             self.window,
             "Confirm Cleaning",
-            f"This will clean:\n\n"
-            f"• {total_items} selected items\n"
-            f"• {size_formatted} of disk space\n"
-            f"• Across {len(categories_to_clean)} categories\n\n"
-            "This action cannot be undone. Continue?",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
+            f"This will permanently delete:\n\n"
+            f"• <b>{total_items}</b> selected items\n"
+            f"• <b>{size_formatted}</b> of disk space\n"
+            f"• Across <b>{len(categories_to_clean)}</b> categories\n\n"
+            "⚠️ This action cannot be undone. Are you sure?",
+            icon_type="warning"
         )
         
-        if reply == QMessageBox.Yes:
+        if dialog.exec() == ConfirmDialog.Accepted:
             self.service.start_clean(categories_to_clean)
     
     def on_clean_started(self):
@@ -225,12 +230,13 @@ class EchoClearApp:
         items_removed = results.get('items_removed', 0)
         size_formatted = self.service.format_size(total_cleaned)
         
-        self.show_info_message(
+        self.show_custom_dialog(
             "Cleaning Complete! ✨",
-            f"Successfully cleaned:\n\n"
-            f"• {size_formatted} of disk space\n"
-            f"• {items_removed} items removed\n\n"
-            "Your system is now cleaner!"
+            f"<b>Successfully cleaned:</b>\n\n"
+            f"✓ <b>{size_formatted}</b> of disk space freed\n"
+            f"✓ <b>{items_removed}</b> items removed\n\n"
+            "Your system is now cleaner and running smoother!",
+            icon_type="success"
         )
     
     def on_clean_failed(self, error_message):
@@ -239,17 +245,24 @@ class EchoClearApp:
         self.window.show_progress(visible=False)
         self.show_error_message("Cleaning Failed", f"An error occurred during cleaning:\n{error_message}")
     
+    def show_custom_dialog(self, title, message, icon_type="info"):
+        """Show custom styled dialog"""
+        dialog = CustomDialog(self.window, title, message, icon_type)
+        dialog.exec()
+    
     def show_info_message(self, title, message):
-        """Show information message"""
-        QMessageBox.information(self.window, title, message)
+        """Show information message (legacy fallback)"""
+        self.show_custom_dialog(title, message, "info")
     
     def show_warning_message(self, title, message):
         """Show warning message"""
-        QMessageBox.warning(self.window, title, message)
+        dialog = CustomDialog(self.window, title, message, icon_type="warning")
+        dialog.exec()
     
     def show_error_message(self, title, message):
         """Show error message"""
-        QMessageBox.critical(self.window, title, message)
+        dialog = CustomDialog(self.window, title, message, icon_type="error")
+        dialog.exec()
     
     def run(self):
         """Show the main window"""

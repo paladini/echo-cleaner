@@ -17,7 +17,7 @@ class DockerCleaner(BaseCleaner):
         )
     
     def scan(self) -> List[Dict]:
-        """Scan for Docker artifacts to clean"""
+        """Scan for Docker artifacts to clean - organized by subcategory"""
         items = []
         
         # Check if Docker is available
@@ -31,19 +31,26 @@ class DockerCleaner(BaseCleaner):
         
         # Find dangling images
         dangling_images = self._find_dangling_images()
+        for img in dangling_images:
+            img['subcategory'] = 'Dangling Images'
         items.extend(dangling_images)
         
         # Find stopped containers
         stopped_containers = self._find_stopped_containers()
+        for cont in stopped_containers:
+            cont['subcategory'] = 'Stopped Containers'
         items.extend(stopped_containers)
         
         # Find unused volumes
         unused_volumes = self._find_unused_volumes()
+        for vol in unused_volumes:
+            vol['subcategory'] = 'Unused Volumes'
         items.extend(unused_volumes)
         
         # Build cache
         build_cache = self._get_build_cache_size()
         if build_cache:
+            build_cache['subcategory'] = 'Build Cache'
             items.append(build_cache)
         
         return items
@@ -63,16 +70,19 @@ class DockerCleaner(BaseCleaner):
                 if line:
                     try:
                         image = json.loads(line)
-                        # Parse size (e.g., "123MB" -> bytes)
+                        # Parse size - Docker provides it in Size field
                         size_str = image.get('Size', '0B')
                         size_bytes = self._parse_docker_size(size_str)
                         
+                        image_id = image.get('ID', 'unknown')[:12]
+                        created = image.get('CreatedSince', 'unknown')
+                        
                         items.append({
                             'path': image.get('ID'),
-                            'name': f"Image {image.get('ID')[:12]}",
+                            'name': f"Image {image_id}",
                             'size': size_bytes,
                             'type': 'docker_image',
-                            'details': f"Dangling image"
+                            'details': f"Created {created}"
                         })
                     except json.JSONDecodeError:
                         continue
@@ -94,15 +104,26 @@ class DockerCleaner(BaseCleaner):
                 if line:
                     try:
                         container = json.loads(line)
-                        size_str = container.get('Size', '0B')
-                        size_bytes = self._parse_docker_size(size_str.split('(')[0].strip())
+                        
+                        # Get actual size using docker ps with --size flag
+                        size_result = self.run_command([
+                            'docker', 'ps', '-a', '-s',
+                            '--filter', f'id={container.get("ID")}',
+                            '--format', '{{.Size}}'
+                        ])
+                        
+                        size_bytes = 0
+                        if size_result.returncode == 0 and size_result.stdout:
+                            # Format is like "0B (virtual 1.23GB)"
+                            size_str = size_result.stdout.strip().split('(')[0].strip()
+                            size_bytes = self._parse_docker_size(size_str)
                         
                         items.append({
                             'path': container.get('ID'),
                             'name': container.get('Names', 'Unknown'),
                             'size': size_bytes,
                             'type': 'docker_container',
-                            'details': f"Stopped container"
+                            'details': f"Stopped • Status: {container.get('Status', 'Unknown')}"
                         })
                     except json.JSONDecodeError:
                         continue
@@ -166,26 +187,35 @@ class DockerCleaner(BaseCleaner):
     
     def _parse_docker_size(self, size_str: str) -> int:
         """Parse Docker size string to bytes"""
+        if not size_str:
+            return 0
+            
         size_str = size_str.strip().upper()
         
-        if not size_str or size_str == '0B':
+        if size_str == '0B' or size_str == 'N/A':
             return 0
         
+        # Remove any extra text (like "virtual" size info)
+        size_str = size_str.split('(')[0].strip()
+        
         units = {
-            'B': 1,
-            'KB': 1024,
-            'MB': 1024 ** 2,
+            'TB': 1024 ** 4,
             'GB': 1024 ** 3,
-            'TB': 1024 ** 4
+            'MB': 1024 ** 2,
+            'KB': 1024,
+            'B': 1
         }
         
+        # Try to find and parse the size with unit
         for unit, multiplier in units.items():
             if unit in size_str:
                 try:
-                    value = float(size_str.replace(unit, '').strip())
+                    # Extract number, handling both "52.8MB" and "52.8 MB" formats
+                    value_str = size_str.replace(unit, '').strip()
+                    value = float(value_str)
                     return int(value * multiplier)
                 except ValueError:
-                    return 0
+                    continue
         
         return 0
     
