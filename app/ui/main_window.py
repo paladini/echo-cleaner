@@ -496,26 +496,28 @@ class MainWindow(QMainWindow):
             
             #subcategoryHeader {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 rgba(0, 122, 255, 0.08),
-                    stop:1 rgba(0, 122, 255, 0.02));
-                border-left: 3px solid #007aff;
-                border-radius: 8px;
-                margin: 8px 0px 4px 0px;
+                    stop:0 rgba(0, 122, 255, 0.06),
+                    stop:1 rgba(0, 122, 255, 0.01));
+                border-left: 2px solid #007aff;
+                border-radius: 6px;
+                margin: 6px 0px 3px 0px;
             }
             
             #subcategoryName {
                 color: #1d1d1f;
                 font-weight: 600;
+                font-size: 12px;
             }
             
             #subcategoryCount {
                 color: #ffffff;
                 background-color: #007aff;
-                padding: 4px 12px;
-                border-radius: 13px;
+                padding: 3px 10px;
+                border-radius: 12px;
                 font-weight: 500;
-                min-width: 70px;
-                max-height: 26px;
+                font-size: 10px;
+                min-width: 65px;
+                max-height: 24px;
             }
             
             #itemName {

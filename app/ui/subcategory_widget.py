@@ -14,21 +14,21 @@ class SubcategoryHeaderWidget(QFrame):
     def __init__(self, name: str, item_count: int, icon: str = "📂", parent=None):
         super().__init__(parent)
         self.setObjectName("subcategoryHeader")
-        self.setMinimumHeight(45)
-        self.setMaximumHeight(45)
+        self.setMinimumHeight(40)
+        self.setMaximumHeight(40)
         
         self._setup_ui(name, item_count, icon)
     
     def _setup_ui(self, name: str, item_count: int, icon: str):
         """Setup the header UI"""
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(16, 10, 16, 10)
+        layout.setContentsMargins(16, 8, 16, 8)
         layout.setSpacing(12)
         
         # Icon and name
         name_label = QLabel(f"{icon} {name}")
         name_label.setObjectName("subcategoryName")
-        name_font = QFont("Inter", 13, QFont.DemiBold)
+        name_font = QFont("Inter", 12, QFont.DemiBold)
         name_label.setFont(name_font)
         layout.addWidget(name_label)
         
@@ -39,10 +39,10 @@ class SubcategoryHeaderWidget(QFrame):
         count_label = QLabel(count_text)
         count_label.setObjectName("subcategoryCount")
         count_label.setAlignment(Qt.AlignCenter)
-        count_font = QFont("Inter", 11, QFont.Medium)
+        count_font = QFont("Inter", 10, QFont.Medium)
         count_label.setFont(count_font)
-        count_label.setFixedHeight(26)
-        count_label.setMinimumWidth(70)
+        count_label.setFixedHeight(24)
+        count_label.setMinimumWidth(65)
         layout.addWidget(count_label)
 
 
@@ -86,7 +86,7 @@ class ItemCheckboxWidget(QFrame):
         name_label = QLabel(name)
         name_label.setObjectName("itemName")
         name_label.setWordWrap(False)
-        name_font = QFont("Inter", 12, QFont.Medium)
+        name_font = QFont("Inter", 11, QFont.Medium)
         name_label.setFont(name_font)
         info_layout.addWidget(name_label)
         
@@ -113,7 +113,7 @@ class ItemCheckboxWidget(QFrame):
         details_label = QLabel(" • ".join(parts))
         details_label.setObjectName("itemDetails")
         details_label.setWordWrap(False)
-        details_font = QFont("Inter", 10)
+        details_font = QFont("Inter", 9)
         details_label.setFont(details_font)
         
         return details_label

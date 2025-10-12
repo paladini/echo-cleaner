@@ -131,9 +131,29 @@ class DockerCleaner(BaseCleaner):
         return items
     
     def _find_unused_volumes(self) -> List[Dict]:
-        """Find unused Docker volumes"""
+        """Find unused Docker volumes with size detection"""
         items = []
         
+        # First, get all volumes with system df
+        df_result = self.run_command([
+            'docker', 'system', 'df', '-v',
+            '--format', '{{json .}}'
+        ])
+        
+        # Parse volume sizes from system df
+        volume_sizes = {}
+        if df_result.returncode == 0 and df_result.stdout:
+            for line in df_result.stdout.strip().split('\n'):
+                if line:
+                    try:
+                        data = json.loads(line)
+                        if data.get('Type') == 'Local Volumes':
+                            # This gives us total, but we need individual volumes
+                            pass
+                    except json.JSONDecodeError:
+                        continue
+        
+        # Get dangling volumes
         result = self.run_command([
             'docker', 'volume', 'ls',
             '--filter', 'dangling=true',
@@ -143,16 +163,34 @@ class DockerCleaner(BaseCleaner):
         if result.returncode == 0 and result.stdout:
             for volume_name in result.stdout.strip().split('\n'):
                 if volume_name:
-                    # Get volume size using inspect
+                    # Try to get volume size via inspect
                     inspect_result = self.run_command([
-                        'docker', 'system', 'df', '-v',
-                        '--format', '{{json .}}'
+                        'docker', 'volume', 'inspect', volume_name,
+                        '--format', '{{.Mountpoint}}'
                     ])
+                    
+                    size_bytes = 0
+                    if inspect_result.returncode == 0 and inspect_result.stdout:
+                        mountpoint = inspect_result.stdout.strip()
+                        # Get directory size using du
+                        du_result = self.run_command([
+                            'du', '-sb', mountpoint
+                        ])
+                        if du_result.returncode == 0 and du_result.stdout:
+                            try:
+                                size_bytes = int(du_result.stdout.split()[0])
+                            except (ValueError, IndexError):
+                                size_bytes = 0
+                    
+                    # Shorten volume name if too long
+                    display_name = volume_name
+                    if len(volume_name) > 64:
+                        display_name = f"{volume_name[:32]}...{volume_name[-28:]}"
                     
                     items.append({
                         'path': volume_name,
-                        'name': volume_name,
-                        'size': 0,  # Docker doesn't easily provide volume sizes
+                        'name': display_name,
+                        'size': size_bytes,
                         'type': 'docker_volume',
                         'details': f"Unused volume"
                     })
