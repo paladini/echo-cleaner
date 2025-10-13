@@ -66,19 +66,30 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 30, 20, 20)
         layout.setSpacing(10)
         
-        # Logo/Title
+        # Logo/Icon placeholder
+        logo_container = QFrame()
+        logo_container.setObjectName("logoContainer")
+        logo_container.setFixedSize(80, 80)
+        logo_layout = QVBoxLayout(logo_container)
+        logo_layout.setContentsMargins(0, 0, 0, 0)
+        logo_layout.setAlignment(Qt.AlignCenter)
+        
+        # Logo icon (using emoji as placeholder until you add a real icon)
+        logo_icon = QLabel("✨")
+        logo_icon.setAlignment(Qt.AlignCenter)
+        logo_icon.setStyleSheet("font-size: 48px;")
+        logo_layout.addWidget(logo_icon)
+        
+        layout.addWidget(logo_container, 0, Qt.AlignHCenter)
+        layout.addSpacing(10)
+        
+        # App Title
         title = QLabel("Echo Clear")
         title.setObjectName("appTitle")
+        title.setAlignment(Qt.AlignCenter)
         title_font = QFont("Inter", 24, QFont.Bold)
         title.setFont(title_font)
         layout.addWidget(title)
-        
-        # Subtitle
-        subtitle = QLabel("System Cleaner")
-        subtitle.setObjectName("appSubtitle")
-        subtitle_font = QFont("Inter", 12)
-        subtitle.setFont(subtitle_font)
-        layout.addWidget(subtitle)
         
         layout.addSpacing(20)
         
@@ -342,14 +353,17 @@ class MainWindow(QMainWindow):
                 border-right: 1px solid #e5e5e7;
             }
             
+            #logoContainer {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                    stop:0 rgba(0, 122, 255, 0.08),
+                    stop:1 rgba(0, 122, 255, 0.02));
+                border: 2px solid #e5e5e7;
+                border-radius: 16px;
+            }
+            
             #appTitle {
                 color: #1d1d1f;
                 margin-bottom: 5px;
-            }
-            
-            #appSubtitle {
-                color: #86868b;
-                margin-bottom: 0px;
             }
             
             #sectionLabel {
