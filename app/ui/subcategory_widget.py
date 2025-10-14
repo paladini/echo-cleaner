@@ -70,11 +70,11 @@ class ItemCheckboxWidget(QFrame):
         # Checkbox
         self.checkbox = QCheckBox()
         self.checkbox.setObjectName(f"checkbox_{self.item_id}")
+        self.checkbox.setTristate(False)  # Disable tristate - only checked/unchecked
         self.checkbox.setChecked(True)  # Selected by default
         self.checkbox.setCursor(Qt.PointingHandCursor)
-        self.checkbox.stateChanged.connect(
-            lambda state: self.selection_changed.emit(state == Qt.Checked)
-        )
+        # Use toggled signal instead of stateChanged to avoid tristate issues
+        self.checkbox.toggled.connect(self._on_toggled)
         layout.addWidget(self.checkbox)
         
         # Item info
@@ -95,6 +95,11 @@ class ItemCheckboxWidget(QFrame):
         info_layout.addWidget(details_label)
         
         layout.addLayout(info_layout, 1)
+    
+    def _on_toggled(self, checked):
+        """Handle checkbox toggle with debugging"""
+        print(f"[ItemCheckbox] {self.item_id} toggled to: {checked}")
+        self.selection_changed.emit(checked)
     
     def _create_details_label(self) -> QLabel:
         """Create the details label with size and path info"""

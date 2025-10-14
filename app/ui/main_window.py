@@ -6,7 +6,7 @@ from typing import List, Dict
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
     QPushButton, QLabel, QListWidget, QListWidgetItem,
-    QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea
+    QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea, QApplication
 )
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFont
@@ -278,6 +278,12 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(20)
         
+        # Action buttons container (Clean + Select/Deselect All)
+        buttons_container = QWidget()
+        buttons_layout = QVBoxLayout(buttons_container)
+        buttons_layout.setSpacing(15)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        
         # Clean button (hidden by default, shown after scan)
         self.clean_button = QPushButton("🧹 Clean Selected Items")
         self.clean_button.setObjectName("cleanButton")
@@ -287,7 +293,20 @@ class MainWindow(QMainWindow):
         self.clean_button.setCursor(Qt.PointingHandCursor)
         self.clean_button.setVisible(False)
         self.clean_button.clicked.connect(self.on_clean_button_clicked)
-        layout.addWidget(self.clean_button, alignment=Qt.AlignCenter)
+        buttons_layout.addWidget(self.clean_button, alignment=Qt.AlignCenter)
+        
+        # Toggle selection button (hidden by default, shown after scan)
+        self.toggle_selection_button = QPushButton("☑️ Deselect All Items")
+        self.toggle_selection_button.setObjectName("toggleSelectionButton")
+        self.toggle_selection_button.setMinimumSize(180, 40)
+        toggle_font = QFont("Inter", 12)
+        self.toggle_selection_button.setFont(toggle_font)
+        self.toggle_selection_button.setCursor(Qt.PointingHandCursor)
+        self.toggle_selection_button.setVisible(False)
+        self.toggle_selection_button.clicked.connect(self.on_toggle_all_selection)
+        buttons_layout.addWidget(self.toggle_selection_button, alignment=Qt.AlignCenter)
+        
+        layout.addWidget(buttons_container)
         
         # Selected items summary
         self.selected_summary = QLabel("")
@@ -456,6 +475,24 @@ class MainWindow(QMainWindow):
             #cleanButton:disabled {
                 background-color: #e8e8ed;
                 color: #86868b;
+            }
+            
+            #toggleSelectionButton, #selectAllButton, #deselectAllButton {
+                background-color: #f5f5f7;
+                color: #1d1d1f;
+                border: 1px solid #d2d2d7;
+                border-radius: 10px;
+                padding: 10px 24px;
+                font-weight: 500;
+            }
+            
+            #toggleSelectionButton:hover, #selectAllButton:hover, #deselectAllButton:hover {
+                background-color: #e8e8ed;
+                border-color: #007aff;
+            }
+            
+            #toggleSelectionButton:pressed, #selectAllButton:pressed, #deselectAllButton:pressed {
+                background-color: #d2d2d7;
             }
             
             #selectedSummary {
@@ -682,21 +719,30 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(10)
         
-        # Header with title and select all button
+        # Header with title, selection badge and button
         header_layout = QHBoxLayout()
         
+        # Title
         items_label = QLabel("Items to Clean")
         items_label.setObjectName("welcomeTitle")
         items_label_font = QFont("Inter", 16, QFont.Medium)
         items_label.setFont(items_label_font)
         header_layout.addWidget(items_label)
         
+        # Selection status badge
+        selection_badge = QLabel("")
+        selection_badge.setObjectName(f"selectionBadge_{category_name}")
+        selection_badge.setVisible(False)
+        badge_font = QFont("Inter", 11, QFont.Medium)
+        selection_badge.setFont(badge_font)
+        header_layout.addWidget(selection_badge)
+        
         header_layout.addStretch()
         
         # Select All / Deselect All button
         select_all_btn = QPushButton("Select All")
         select_all_btn.setObjectName(f"selectAllBtn_{category_name}")
-        select_all_btn.setMinimumSize(120, 35)
+        select_all_btn.setMinimumSize(140, 38)
         select_all_btn.setCursor(Qt.PointingHandCursor)
         select_all_btn.clicked.connect(lambda: self.toggle_select_all(category_name))
         header_layout.addWidget(select_all_btn)
@@ -823,6 +869,10 @@ class MainWindow(QMainWindow):
         if not items:
             info_label.setText("✓ No items found - this category is clean!")
             info_label.setVisible(True)
+            # Hide badge when no items
+            selection_badge = view.findChild(QLabel, f"selectionBadge_{category_name}")
+            if selection_badge:
+                selection_badge.setVisible(False)
         else:
             info_label.setVisible(False)
             
@@ -835,6 +885,9 @@ class MainWindow(QMainWindow):
                 self._render_without_subcategories(category_name, items, layout)
             
             layout.addStretch()
+            
+            # Force initial update of category visuals after rendering
+            self.update_category_selection_visuals(category_name)
         
         self.update_selection_summary()
     
@@ -865,17 +918,20 @@ class MainWindow(QMainWindow):
                     'data': item_widget.item_data
                 }
                 
-                # Connect signal to update selection
-                item_widget.selection_changed.connect(
-                    lambda checked, cat=category_name, gidx=global_idx: 
-                    self._on_item_selection_changed_new(cat, gidx, checked)
-                )
+                # Connect signal with proper closure to capture global_idx by value
+                def make_callback(cat, gidx):
+                    return lambda checked: self._on_item_selection_changed_new(cat, gidx, checked)
+                
+                item_widget.selection_changed.connect(make_callback(category_name, global_idx))
             
             layout.addWidget(group_widget)
             idx += len(subcat_items)
     
     def _render_without_subcategories(self, category_name: str, items: List[Dict], layout):
         """Render items without subcategory grouping (legacy mode)"""
+        print(f"\n[RENDER] _render_without_subcategories for {category_name}")
+        print(f"  - Items count: {len(items)}")
+        
         for idx, item_data in enumerate(items):
             item_id = f"{category_name}_{idx}"
             item_widget = ItemCheckboxWidget(item_data, item_id)
@@ -885,20 +941,62 @@ class MainWindow(QMainWindow):
                 'selected': True,
                 'data': item_data
             }
+            print(f"  - Created item {idx}: {item_data.get('name', 'Unknown')}")
             
-            # Connect selection change
-            item_widget.selection_changed.connect(
-                lambda checked, cat=category_name, i=idx: 
-                self._on_item_selection_changed_new(cat, i, checked)
-            )
+            # Connect selection change - use a factory function to capture idx by value
+            def make_callback(cat, item_idx):
+                print(f"  - Connecting callback for {cat}[{item_idx}]")
+                return lambda checked: self._on_item_selection_changed_new(cat, item_idx, checked)
+            
+            item_widget.selection_changed.connect(make_callback(category_name, idx))
             
             layout.addWidget(item_widget)
+        
+        print(f"  ✓ Render complete\n")
     
     def _on_item_selection_changed_new(self, category_name: str, item_idx: int, is_checked: bool):
         """Handle item selection change from new components"""
-        if category_name in self.selected_items and item_idx in self.selected_items[category_name]:
-            self.selected_items[category_name][item_idx]['selected'] = is_checked
-            self.update_selection_summary()
+        print(f"\n[HANDLER] _on_item_selection_changed_new called:")
+        print(f"  - Category: {category_name}")
+        print(f"  - Item Index: {item_idx}")
+        print(f"  - Is Checked: {is_checked}")
+        
+        if category_name not in self.selected_items:
+            print(f"  ❌ ERROR: Category '{category_name}' not in self.selected_items!")
+            print(f"  Available categories: {list(self.selected_items.keys())}")
+            return
+            
+        if item_idx not in self.selected_items[category_name]:
+            print(f"  ❌ ERROR: Item index {item_idx} not in category!")
+            print(f"  Available indices: {list(self.selected_items[category_name].keys())}")
+            return
+        
+        # Update selection state
+        old_state = self.selected_items[category_name][item_idx]['selected']
+        self.selected_items[category_name][item_idx]['selected'] = is_checked
+        print(f"  ✓ Updated state: {old_state} → {is_checked}")
+        
+        # Count current selection
+        selected_count = sum(1 for item in self.selected_items[category_name].values() if item['selected'])
+        total_count = len(self.selected_items[category_name])
+        print(f"  ✓ Current selection: {selected_count}/{total_count}")
+        
+        # Force immediate visual update
+        print(f"  → Calling update_category_selection_visuals...")
+        self.update_category_selection_visuals(category_name)
+        print(f"  → Calling update_selection_summary...")
+        self.update_selection_summary()
+        
+        # Force Qt to process pending events and update the UI
+        QApplication.processEvents()
+        
+        # Force the view to repaint
+        if category_name in self.category_views:
+            view = self.category_views[category_name]
+            view.update()
+            view.repaint()
+        
+        print(f"  ✓ Handler completed\n")
     
     # Legacy methods - kept for backward compatibility if needed
     # These are now replaced by SubcategoryGroupWidget and ItemCheckboxWidget
@@ -908,7 +1006,7 @@ class MainWindow(QMainWindow):
         self._on_item_selection_changed_new(category_name, item_idx, is_checked)
     
     def toggle_select_all(self, category_name):
-        """Toggle select all items in a category"""
+        """Toggle select all items in a category with visual feedback"""
         if category_name not in self.selected_items:
             return
         
@@ -922,25 +1020,104 @@ class MainWindow(QMainWindow):
         all_selected = all(
             item['selected'] 
             for item in self.selected_items[category_name].values()
+            if item  # Skip None values
         )
         
-        # Toggle all
+        # Toggle all: if all selected, deselect. Otherwise, select all.
         new_state = not all_selected
         
+        # Update internal state
         for item_idx in self.selected_items[category_name]:
             self.selected_items[category_name][item_idx]['selected'] = new_state
-            
-            # Update checkbox UI
-            checkbox = items_container.findChild(QCheckBox, f"checkbox_{category_name}_{item_idx}")
-            if checkbox:
+        
+        # Update all checkbox widgets in the UI
+        checkboxes = items_container.findChildren(QCheckBox)
+        for checkbox in checkboxes:
+            if checkbox.objectName().startswith(f"checkbox_{category_name}_"):
+                checkbox.blockSignals(True)  # Prevent signal spam
                 checkbox.setChecked(new_state)
+                checkbox.blockSignals(False)
+        
+        # Force immediate update of category visuals
+        self.update_category_selection_visuals(category_name)
+        self.update_selection_summary()
+    
+    def update_category_selection_visuals(self, category_name):
+        """Update button text and badge for a specific category"""
+        if category_name not in self.selected_items or category_name not in self.category_views:
+            return
+        
+        view = self.category_views[category_name]
+        
+        # Count selected items
+        total_items = len(self.selected_items[category_name])
+        if total_items == 0:
+            return
+            
+        selected_count = sum(
+            1 for item in self.selected_items[category_name].values() 
+            if item['selected']
+        )
         
         # Update button text
         select_all_btn = view.findChild(QPushButton, f"selectAllBtn_{category_name}")
         if select_all_btn:
-            select_all_btn.setText("Deselect All" if new_state else "Select All")
+            if selected_count == total_items:
+                select_all_btn.setText("☑️ Deselect All")
+            elif selected_count == 0:
+                select_all_btn.setText("☐ Select All")
+            else:
+                select_all_btn.setText("☑️ Deselect All")  # Default action when partial
         
-        self.update_selection_summary()
+        # Update selection badge
+        selection_badge = view.findChild(QLabel, f"selectionBadge_{category_name}")
+        if selection_badge:
+            # Always update badge visibility and content
+            if selected_count == total_items:
+                # All selected - green badge
+                selection_badge.setText("✓ All selected")
+                selection_badge.setStyleSheet("""
+                    QLabel {
+                        background-color: #34C759;
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 12px;
+                        font-weight: 500;
+                    }
+                """)
+                selection_badge.setVisible(True)
+            elif selected_count == 0:
+                # None selected - gray badge
+                selection_badge.setText("None selected")
+                selection_badge.setStyleSheet("""
+                    QLabel {
+                        background-color: #8E8E93;
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 12px;
+                        font-weight: 500;
+                    }
+                """)
+                selection_badge.setVisible(True)
+            else:
+                # Partial selection - blue badge
+                selection_badge.setText(f"{selected_count}/{total_items} selected")
+                selection_badge.setStyleSheet("""
+                    QLabel {
+                        background-color: #007AFF;
+                        color: white;
+                        padding: 4px 12px;
+                        border-radius: 12px;
+                        font-weight: 500;
+                    }
+                """)
+                selection_badge.setVisible(True)
+            
+            # Force widget update with proper size recalculation
+            selection_badge.adjustSize()  # Recalculate size based on new text
+            selection_badge.update()
+            selection_badge.repaint()
+            QApplication.processEvents()  # Process all pending events
     
     def update_selection_summary(self):
         """Update the selection summary on dashboard"""
@@ -964,6 +1141,81 @@ class MainWindow(QMainWindow):
             self.selected_summary.setText("No items selected")
             self.selected_summary.setVisible(True)
             self.clean_button.setEnabled(False)
+        
+        # Update toggle button text
+        self.update_toggle_button_text()
+    
+    def update_toggle_button_text(self):
+        """Update toggle button text based on current selection state"""
+        total_items = 0
+        selected_items = 0
+        
+        for category_items in self.selected_items.values():
+            for item in category_items.values():
+                total_items += 1
+                if item['selected']:
+                    selected_items += 1
+        
+        if selected_items == 0:
+            # All deselected - show "Select All"
+            self.toggle_selection_button.setText("☑️ Select All Items")
+            self.toggle_selection_button.setObjectName("selectAllButton")
+        elif selected_items == total_items:
+            # All selected - show "Deselect All"
+            self.toggle_selection_button.setText("☐ Deselect All Items")
+            self.toggle_selection_button.setObjectName("deselectAllButton")
+        else:
+            # Partially selected - show "Deselect All" (default action)
+            self.toggle_selection_button.setText("☐ Deselect All Items")
+            self.toggle_selection_button.setObjectName("deselectAllButton")
+        
+        # Reapply styles
+        self.toggle_selection_button.style().unpolish(self.toggle_selection_button)
+        self.toggle_selection_button.style().polish(self.toggle_selection_button)
+    
+    def on_toggle_all_selection(self):
+        """Toggle all items selection across all categories"""
+        # Check current state
+        total_items = 0
+        selected_items = 0
+        
+        for category_items in self.selected_items.values():
+            for item in category_items.values():
+                total_items += 1
+                if item['selected']:
+                    selected_items += 1
+        
+        # Decide action: if all selected, deselect all. Otherwise, select all
+        new_state = (selected_items == 0)
+        
+        # Apply to all items
+        for category_name, category_items in self.selected_items.items():
+            for item_idx in category_items.keys():
+                self.selected_items[category_name][item_idx]['selected'] = new_state
+        
+        # Update all checkboxes in UI
+        self._update_all_checkboxes(new_state)
+        
+        # Update visuals for all categories
+        for category_name in self.selected_items.keys():
+            self.update_category_selection_visuals(category_name)
+        
+        # Update summary
+        self.update_selection_summary()
+    
+    def _update_all_checkboxes(self, checked: bool):
+        """Update all checkbox widgets to match the new state"""
+        # Find all ItemCheckboxWidget instances and update them
+        for category_name, view in self.category_views.items():
+            # Find all checkbox widgets in the view
+            items_container = view.findChild(QWidget, f"itemsContainer_{category_name}")
+            if items_container:
+                checkboxes = items_container.findChildren(QCheckBox)
+                for checkbox in checkboxes:
+                    if checkbox.objectName().startswith("checkbox_"):
+                        checkbox.blockSignals(True)  # Prevent signal spam
+                        checkbox.setChecked(checked)
+                        checkbox.blockSignals(False)
     
     def on_clean_button_clicked(self):
         """Handle clean button click"""
@@ -983,10 +1235,12 @@ class MainWindow(QMainWindow):
             self.clean_requested.emit(selected_for_cleaning)
     
     def show_clean_button(self, visible=True):
-        """Show or hide the clean button on dashboard"""
+        """Show or hide the clean button and toggle selection button on dashboard"""
         self.clean_button.setVisible(visible)
+        self.toggle_selection_button.setVisible(visible)
         if visible:
             self.update_selection_summary()
+            self.update_toggle_button_text()
         else:
             self.selected_summary.setVisible(False)
     
