@@ -97,8 +97,7 @@ class ItemCheckboxWidget(QFrame):
         layout.addLayout(info_layout, 1)
     
     def _on_toggled(self, checked):
-        """Handle checkbox toggle with debugging"""
-        print(f"[ItemCheckbox] {self.item_id} toggled to: {checked}")
+        """Handle checkbox toggle"""
         self.selection_changed.emit(checked)
     
     def _create_details_label(self) -> QLabel:

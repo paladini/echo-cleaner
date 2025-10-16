@@ -118,7 +118,7 @@ class MainWindow(QMainWindow):
             ("🐳", "Docker"),
             ("☸️", "Kubernetes"),
             ("📚", "Dev Dependencies"),
-            ("⚙️", "Settings")
+            ("ℹ️", "About")
         ]
         
         for icon, name in categories:
@@ -173,9 +173,9 @@ class MainWindow(QMainWindow):
             self.stacked_widget.addWidget(view)
             self.category_views[category_name] = view
         
-        # Settings view (index 8)
-        settings = self.create_settings_view()
-        self.stacked_widget.addWidget(settings)
+        # About view (index 8)
+        about = self.create_about_view()
+        self.stacked_widget.addWidget(about)
         
         layout.addWidget(self.stacked_widget, 1)
         
@@ -668,6 +668,87 @@ class MainWindow(QMainWindow):
             #statusLabel {
                 color: #424245;
             }
+            
+            /* About Page */
+            #aboutView {
+                background-color: #f5f5f7;
+            }
+            
+            #aboutVersion {
+                color: #86868b;
+                font-weight: 500;
+                letter-spacing: 0.3px;
+            }
+            
+            #aboutDescCard {
+                background-color: #ffffff;
+                border: 1px solid #e5e5e7;
+                border-radius: 18px;
+            }
+            
+            #aboutDescription {
+                color: #1d1d1f;
+                line-height: 1.55;
+            }
+            
+            #aboutCreatorTitle {
+                color: #86868b;
+                letter-spacing: 1.5px;
+                font-weight: 600;
+            }
+            
+            #aboutCreatorName {
+                color: #1d1d1f;
+                letter-spacing: -0.3px;
+            }
+            
+            #aboutCreatorSubtitle {
+                color: #6e6e73;
+                line-height: 1.5;
+            }
+            
+            #aboutGithubButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #2d2d2f, stop:1 #1d1d1f);
+                color: #ffffff;
+                border: none;
+                border-radius: 12px;
+                padding: 14px 28px;
+                text-align: center;
+            }
+            
+            #aboutGithubButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #3d3d3f, stop:1 #2d2d2f);
+            }
+            
+            #aboutGithubButton:pressed {
+                background: #1d1d1f;
+            }
+            
+            #aboutSponsorButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #ff3b82, stop:1 #ff2d72);
+                color: #ffffff;
+                border: none;
+                border-radius: 12px;
+                padding: 14px 28px;
+                text-align: center;
+            }
+            
+            #aboutSponsorButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #ff5596, stop:1 #ff3b82);
+            }
+            
+            #aboutSponsorButton:pressed {
+                background: #ff2d72;
+            }
+            
+            #aboutFooterNote {
+                color: #86868b;
+                line-height: 1.5;
+            }
         """)
     
     def center_on_screen(self):
@@ -693,7 +774,7 @@ class MainWindow(QMainWindow):
             "Docker",
             "Kubernetes",
             "Dev Dependencies",
-            "Settings"
+            "About"
         ]
         
         if index < len(category_names):
@@ -777,35 +858,130 @@ class MainWindow(QMainWindow):
         
         return view
     
-    def create_settings_view(self):
-        """Create settings view"""
+    def create_about_view(self):
+        """Create about view - elegant and modern"""
         view = QFrame()
-        view.setObjectName("settingsView")
+        view.setObjectName("aboutView")
         
-        layout = QVBoxLayout(view)
-        layout.setContentsMargins(0, 20, 0, 0)
-        layout.setSpacing(25)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        # Title
-        title = QLabel("Settings")
-        title.setObjectName("welcomeTitle")
-        title_font = QFont("Inter", 20, QFont.Medium)
-        title.setFont(title_font)
-        layout.addWidget(title)
+        content = QWidget()
+        layout = QVBoxLayout(content)
+        layout.setContentsMargins(60, 45, 60, 45)
+        layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         
-        # Description
-        description = QLabel(
-            "Settings and preferences will be available in a future version."
-        )
-        description.setObjectName("description")
+        # Versão
+        version_label = QLabel("Version 0.1.0")
+        version_label.setObjectName("aboutVersion")
+        version_label.setAlignment(Qt.AlignCenter)
+        version_font = QFont("Inter", 12)
+        version_label.setFont(version_font)
+        layout.addWidget(version_label, 0, Qt.AlignHCenter)
+        layout.addSpacing(28)
+        
+        # Card de descrição
+        desc_card = QFrame()
+        desc_card.setObjectName("aboutDescCard")
+        desc_card.setMaximumWidth(520)
+        desc_layout = QVBoxLayout(desc_card)
+        desc_layout.setContentsMargins(30, 22, 30, 22)
+        desc_layout.setSpacing(0)
+        
+        description = QLabel("An intelligent system cleaner for Linux, designed to help you reclaim disk space with style and efficiency.")
+        description.setObjectName("aboutDescription")
         description.setWordWrap(True)
-        desc_font = QFont("Inter", 11)
+        description.setAlignment(Qt.AlignCenter)
+        desc_font = QFont("Inter", 13)
         description.setFont(desc_font)
-        layout.addWidget(description)
+        desc_layout.addWidget(description)
         
-        layout.addStretch()
+        layout.addWidget(desc_card, 0, Qt.AlignHCenter)
+        layout.addSpacing(32)
+        
+        # Seção do criador
+        creator_title = QLabel("CREATED BY")
+        creator_title.setObjectName("aboutCreatorTitle")
+        creator_title.setAlignment(Qt.AlignCenter)
+        creator_title_font = QFont("Inter", 9, QFont.Bold)
+        creator_title.setFont(creator_title_font)
+        layout.addWidget(creator_title, 0, Qt.AlignHCenter)
+        
+        layout.addSpacing(8)
+        
+        creator_name = QLabel("Fernando Paladini")
+        creator_name.setObjectName("aboutCreatorName")
+        creator_name.setAlignment(Qt.AlignCenter)
+        creator_name_font = QFont("Inter", 20, QFont.Bold)
+        creator_name.setFont(creator_name_font)
+        layout.addWidget(creator_name, 0, Qt.AlignHCenter)
+        
+        layout.addSpacing(6)
+        
+        creator_subtitle = QLabel("Building beautiful software through Vibe Coding")
+        creator_subtitle.setObjectName("aboutCreatorSubtitle")
+        creator_subtitle.setAlignment(Qt.AlignCenter)
+        creator_subtitle.setWordWrap(True)
+        creator_subtitle_font = QFont("Inter", 12)
+        creator_subtitle.setFont(creator_subtitle_font)
+        layout.addWidget(creator_subtitle)
+        
+        layout.addSpacing(32)
+        
+        # Botões de ação (apenas 2)
+        buttons_container = QWidget()
+        buttons_container.setMaximumWidth(340)
+        buttons_layout = QVBoxLayout(buttons_container)
+        buttons_layout.setSpacing(10)
+        buttons_layout.setContentsMargins(0, 0, 0, 0)
+        
+        github_button = QPushButton("⭐  Star on GitHub")
+        github_button.setObjectName("aboutGithubButton")
+        github_button.setFixedHeight(46)
+        github_button.setCursor(Qt.PointingHandCursor)
+        github_font = QFont("Inter", 13, QFont.DemiBold)
+        github_button.setFont(github_font)
+        github_button.clicked.connect(lambda: self.open_url("https://github.com/paladini/echo-clear"))
+        buttons_layout.addWidget(github_button)
+        
+        sponsor_button = QPushButton("💖  Sponsor this Project")
+        sponsor_button.setObjectName("aboutSponsorButton")
+        sponsor_button.setFixedHeight(46)
+        sponsor_button.setCursor(Qt.PointingHandCursor)
+        sponsor_font = QFont("Inter", 13, QFont.DemiBold)
+        sponsor_button.setFont(sponsor_font)
+        sponsor_button.clicked.connect(lambda: self.open_url("https://github.com/sponsors/paladini"))
+        buttons_layout.addWidget(sponsor_button)
+        
+        layout.addWidget(buttons_container, 0, Qt.AlignHCenter)
+        layout.addSpacing(24)
+        
+        # Nota de rodapé
+        footer_note = QLabel("Can't sponsor? A star is just as meaningful ⭐")
+        footer_note.setObjectName("aboutFooterNote")
+        footer_note.setAlignment(Qt.AlignCenter)
+        footer_note.setWordWrap(True)
+        footer_font = QFont("Inter", 11)
+        footer_note.setFont(footer_font)
+        layout.addWidget(footer_note)
+        
+        layout.addSpacing(45)
+        
+        scroll.setWidget(content)
+        
+        main_layout = QVBoxLayout(view)
+        main_layout.setContentsMargins(0, 0, 0, 0)
+        main_layout.addWidget(scroll)
         
         return view
+    
+    def open_url(self, url):
+        """Open URL in default browser"""
+        import webbrowser
+        webbrowser.open(url)
     
     def get_category_description(self, category_name):
         """Get description for a category"""
@@ -929,9 +1105,6 @@ class MainWindow(QMainWindow):
     
     def _render_without_subcategories(self, category_name: str, items: List[Dict], layout):
         """Render items without subcategory grouping (legacy mode)"""
-        print(f"\n[RENDER] _render_without_subcategories for {category_name}")
-        print(f"  - Items count: {len(items)}")
-        
         for idx, item_data in enumerate(items):
             item_id = f"{category_name}_{idx}"
             item_widget = ItemCheckboxWidget(item_data, item_id)
@@ -941,50 +1114,28 @@ class MainWindow(QMainWindow):
                 'selected': True,
                 'data': item_data
             }
-            print(f"  - Created item {idx}: {item_data.get('name', 'Unknown')}")
             
             # Connect selection change - use a factory function to capture idx by value
             def make_callback(cat, item_idx):
-                print(f"  - Connecting callback for {cat}[{item_idx}]")
                 return lambda checked: self._on_item_selection_changed_new(cat, item_idx, checked)
             
             item_widget.selection_changed.connect(make_callback(category_name, idx))
             
             layout.addWidget(item_widget)
-        
-        print(f"  ✓ Render complete\n")
     
     def _on_item_selection_changed_new(self, category_name: str, item_idx: int, is_checked: bool):
         """Handle item selection change from new components"""
-        print(f"\n[HANDLER] _on_item_selection_changed_new called:")
-        print(f"  - Category: {category_name}")
-        print(f"  - Item Index: {item_idx}")
-        print(f"  - Is Checked: {is_checked}")
-        
         if category_name not in self.selected_items:
-            print(f"  ❌ ERROR: Category '{category_name}' not in self.selected_items!")
-            print(f"  Available categories: {list(self.selected_items.keys())}")
             return
             
         if item_idx not in self.selected_items[category_name]:
-            print(f"  ❌ ERROR: Item index {item_idx} not in category!")
-            print(f"  Available indices: {list(self.selected_items[category_name].keys())}")
             return
         
         # Update selection state
-        old_state = self.selected_items[category_name][item_idx]['selected']
         self.selected_items[category_name][item_idx]['selected'] = is_checked
-        print(f"  ✓ Updated state: {old_state} → {is_checked}")
-        
-        # Count current selection
-        selected_count = sum(1 for item in self.selected_items[category_name].values() if item['selected'])
-        total_count = len(self.selected_items[category_name])
-        print(f"  ✓ Current selection: {selected_count}/{total_count}")
         
         # Force immediate visual update
-        print(f"  → Calling update_category_selection_visuals...")
         self.update_category_selection_visuals(category_name)
-        print(f"  → Calling update_selection_summary...")
         self.update_selection_summary()
         
         # Force Qt to process pending events and update the UI
@@ -995,8 +1146,6 @@ class MainWindow(QMainWindow):
             view = self.category_views[category_name]
             view.update()
             view.repaint()
-        
-        print(f"  ✓ Handler completed\n")
     
     # Legacy methods - kept for backward compatibility if needed
     # These are now replaced by SubcategoryGroupWidget and ItemCheckboxWidget
