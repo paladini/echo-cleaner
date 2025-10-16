@@ -921,7 +921,7 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(6)
         
-        creator_subtitle = QLabel("Building beautiful software through Vibe Coding")
+        creator_subtitle = QLabel("Building powerful Linux applications through Vibe Coding")
         creator_subtitle.setObjectName("aboutCreatorSubtitle")
         creator_subtitle.setAlignment(Qt.AlignCenter)
         creator_subtitle.setWordWrap(True)

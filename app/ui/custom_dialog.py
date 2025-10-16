@@ -66,6 +66,7 @@ class CustomDialog(QDialog):
         message_label = QLabel(message)
         message_label.setObjectName("dialogMessage")
         message_label.setWordWrap(True)
+        message_label.setTextFormat(Qt.RichText)
         message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         main_layout.addWidget(message_label)
         
@@ -209,6 +210,7 @@ class ConfirmDialog(QDialog):
         message_label = QLabel(message)
         message_label.setObjectName("dialogMessage")
         message_label.setWordWrap(True)
+        message_label.setTextFormat(Qt.RichText)
         message_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
         main_layout.addWidget(message_label)
         
