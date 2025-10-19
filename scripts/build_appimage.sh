@@ -26,15 +26,23 @@ APP_DIR="build/${APP_NAME}.AppDir"
 VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2 2>/dev/null || echo "0.2.0")
 OUTPUT_NAME="${APP_NAME}-x86_64.AppImage"
 
-# Verificar se appimagetool existe
-if [ ! -f "appimagetool-x86_64.AppImage" ]; then
-    echo -e "${RED}Error: appimagetool-x86_64.AppImage not found in project root!${NC}"
-    echo "Download it from: https://github.com/AppImage/AppImageKit/releases"
-    exit 1
+# Verificar se appimagetool existe, se não, baixar automaticamente
+APPIMAGETOOL="tools/appimagetool-x86_64.AppImage"
+if [ ! -f "$APPIMAGETOOL" ]; then
+    echo -e "${YELLOW}appimagetool not found. Downloading...${NC}"
+    mkdir -p tools
+    wget -q --show-progress -O "$APPIMAGETOOL" \
+        https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+    
+    if [ ! -f "$APPIMAGETOOL" ]; then
+        echo -e "${RED}Error: Failed to download appimagetool!${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ appimagetool downloaded successfully${NC}\n"
 fi
 
 # Garantir que appimagetool é executável
-chmod +x appimagetool-x86_64.AppImage
+chmod +x "$APPIMAGETOOL"
 
 # Criar/atualizar estrutura AppDir
 echo -e "${YELLOW}Step 1: Creating/updating AppDir structure...${NC}"
@@ -151,7 +159,7 @@ if [ -f "${OUTPUT_NAME}" ]; then
 fi
 
 # Executar appimagetool
-ARCH=x86_64 ./appimagetool-x86_64.AppImage "${APP_DIR}" "${OUTPUT_NAME}"
+ARCH=x86_64 "$APPIMAGETOOL" "${APP_DIR}" "${OUTPUT_NAME}"
 
 if [ -f "${OUTPUT_NAME}" ]; then
     chmod +x "${OUTPUT_NAME}"

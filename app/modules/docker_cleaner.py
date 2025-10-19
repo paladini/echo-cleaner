@@ -3,6 +3,7 @@ Docker Cleaner - Cleans Docker artifacts
 """
 
 import json
+import re
 from typing import List, Dict
 from .base_cleaner import BaseCleaner
 
@@ -134,26 +135,62 @@ class DockerCleaner(BaseCleaner):
         """Find unused Docker volumes with size detection"""
         items = []
         
-        # First, get all volumes with system df
+        # Get all volumes with their sizes using docker system df -v
         df_result = self.run_command([
-            'docker', 'system', 'df', '-v',
-            '--format', '{{json .}}'
+            'docker', 'system', 'df', '-v'
         ])
         
-        # Parse volume sizes from system df
+        # Parse volume sizes from docker system df -v
+        # Format: VOLUME_NAME    LINKS    SIZE (columns aligned with lots of spaces)
         volume_sizes = {}
         if df_result.returncode == 0 and df_result.stdout:
-            for line in df_result.stdout.strip().split('\n'):
-                if line:
-                    try:
-                        data = json.loads(line)
-                        if data.get('Type') == 'Local Volumes':
-                            # This gives us total, but we need individual volumes
-                            pass
-                    except json.JSONDecodeError:
+            lines = df_result.stdout.strip().split('\n')
+            in_volumes_section = False
+            header_found = False
+            
+            for line in lines:
+                # Find volumes section
+                if 'Local Volumes space usage:' in line:
+                    in_volumes_section = True
+                    continue
+                
+                # Skip header line
+                if in_volumes_section and 'VOLUME NAME' in line:
+                    header_found = True
+                    continue
+                
+                # Skip processing until we've seen the header
+                if in_volumes_section and not header_found:
+                    continue
+                
+                # Empty line after we've started processing data ends the section
+                if in_volumes_section and header_found and not line.strip():
+                    # Only break if we've already parsed some volumes
+                    # (skip initial empty lines after header)
+                    if volume_sizes:
+                        break
+                    else:
                         continue
+                
+                # Parse volume data line
+                # The format has LOTS of whitespace between columns
+                if in_volumes_section and header_found and line.strip():
+                    # Split by whitespace and take last 2 elements as LINKS and SIZE
+                    parts = line.split()
+                    if len(parts) >= 3:
+                        # Last part is SIZE, second-to-last is LINKS
+                        size_str = parts[-1]
+                        try:
+                            links = int(parts[-2])
+                            # Everything before last 2 elements is the volume name
+                            vol_name = ' '.join(parts[:-2])
+                            size_bytes = self._parse_docker_size(size_str)
+                            volume_sizes[vol_name] = size_bytes
+                        except ValueError:
+                            # Second-to-last wasn't a number, skip this line
+                            pass
         
-        # Get dangling volumes
+        # Get dangling (unused) volumes
         result = self.run_command([
             'docker', 'volume', 'ls',
             '--filter', 'dangling=true',
@@ -163,26 +200,16 @@ class DockerCleaner(BaseCleaner):
         if result.returncode == 0 and result.stdout:
             for volume_name in result.stdout.strip().split('\n'):
                 if volume_name:
-                    # Try to get volume size via inspect
-                    inspect_result = self.run_command([
-                        'docker', 'volume', 'inspect', volume_name,
-                        '--format', '{{.Mountpoint}}'
-                    ])
+                    # Get size from the parsed volume_sizes dict
+                    size_bytes = volume_sizes.get(volume_name, 0)
                     
-                    size_bytes = 0
-                    if inspect_result.returncode == 0 and inspect_result.stdout:
-                        mountpoint = inspect_result.stdout.strip()
-                        # Get directory size using du
-                        du_result = self.run_command([
-                            'du', '-sb', mountpoint
-                        ])
-                        if du_result.returncode == 0 and du_result.stdout:
-                            try:
-                                size_bytes = int(du_result.stdout.split()[0])
-                            except (ValueError, IndexError):
-                                size_bytes = 0
+                    # Add visual indicator for empty volumes
+                    if size_bytes == 0:
+                        details = "Empty volume • No data stored"
+                    else:
+                        details = "Unused volume"
                     
-                    # Shorten volume name if too long
+                    # Shorten volume name if too long for display
                     display_name = volume_name
                     if len(volume_name) > 64:
                         display_name = f"{volume_name[:32]}...{volume_name[-28:]}"
@@ -192,7 +219,7 @@ class DockerCleaner(BaseCleaner):
                         'name': display_name,
                         'size': size_bytes,
                         'type': 'docker_volume',
-                        'details': f"Unused volume"
+                        'details': details
                     })
         
         return items

@@ -43,3 +43,7 @@ Thumbs.db
 *.deb
 *.snap
 *.flatpak
+*.AppImage
+
+# Build tools (downloaded automatically)
+tools/
