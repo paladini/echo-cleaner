@@ -1,10 +1,10 @@
 #!/bin/bash
-# Echo Clear Installation Script
+# Echo Cleaner Installation Script
 
 set -e
 
 echo "========================================"
-echo "  Echo Clear Installation"
+echo "  Echo Cleaner Installation"
 echo "========================================"
 echo ""
 
@@ -54,7 +54,7 @@ echo "========================================"
 echo "  Installation Complete! ✨"
 echo "========================================"
 echo ""
-echo "To run Echo Clear:"
+echo "To run Echo Cleaner:"
 echo "  ./echo-cleaner.py"
 echo ""
 echo "Or:"

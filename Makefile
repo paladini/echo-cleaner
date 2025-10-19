@@ -1,7 +1,7 @@
 .PHONY: help install install-dev run clean build-appimage download-tools test format lint
 
 help:
-	@echo "Echo Clear - Makefile Commands"
+	@echo "Echo Cleaner - Makefile Commands"
 	@echo ""
 	@echo "  make install        - Install dependencies"
 	@echo "  make install-dev    - Install dev dependencies"

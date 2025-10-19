@@ -2,7 +2,7 @@
 
 ## Main Dashboard
 
-![Echo Clear Dashboard](screenshots/dashboard.png)
+![Echo Cleaner Dashboard](screenshots/dashboard.png)
 
 *The main dashboard showing scan results with statistics cards*
 

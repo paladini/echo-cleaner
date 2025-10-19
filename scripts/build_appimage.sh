@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script para criar AppImage do Echo Clear
+# Script para criar AppImage do Echo Cleaner
 # Uso: ./scripts/build_appimage.sh ou make build-appimage
 
 set -e  # Sair em caso de erro
@@ -17,7 +17,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 echo -e "${BLUE}╔════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Echo Clear - AppImage Builder        ║${NC}"
+echo -e "${BLUE}║  Echo Cleaner - AppImage Builder      ║${NC}"
 echo -e "${BLUE}╚════════════════════════════════════════╝${NC}\n"
 
 # Variáveis
@@ -83,7 +83,7 @@ cat > "${APP_DIR}/${APP_NAME}.desktop" << 'EOFDESKTOP'
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Echo Clear
+Name=Echo Cleaner
 Comment=Intelligent System Cleaner for Linux
 Exec=EchoCleaner
 Icon=EchoCleaner

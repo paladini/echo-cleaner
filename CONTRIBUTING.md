@@ -1,6 +1,6 @@
-# Contributing to Echo Clear
+# Contributing to Echo Cleaner
 
-Thank you for your interest in contributing to Echo Clear! 🎉
+Thank you for your interest in contributing to Echo Cleaner! 🎉
 
 ## Getting Started
 
@@ -25,7 +25,7 @@ Thank you for your interest in contributing to Echo Clear! 🎉
 
 ## Architecture Overview
 
-Echo Clear follows a **layered architecture** based on SOLID principles:
+Echo Cleaner follows a **layered architecture** based on SOLID principles:
 
 ### 1. Presentation Layer (`app/ui/`)
 - Contains all UI components

@@ -1,5 +1,5 @@
 """
-Echo Clear - Application Entry Point
+Echo Cleaner - Application Entry Point
 """
 
 import sys
@@ -304,10 +304,10 @@ def main():
     
     # Create application
     app = QApplication(sys.argv)
-    app.setApplicationName("Echo Clear")
-    app.setOrganizationName("Echo Clear Team")
+    app.setApplicationName("Echo Cleaner")
+    app.setOrganizationName("Echo Cleaner Team")
     
-    # Create and run Echo Clear
+    # Create and run Echo Cleaner
     echo_clear = EchoClearApp()
     echo_clear.run()
     

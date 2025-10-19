@@ -1,12 +1,12 @@
 #!/bin/bash
-# Echo Clear Uninstall Script
+# Echo Cleaner Uninstall Script
 
 echo "========================================"
-echo "  Echo Clear Uninstaller"
+echo "  Echo Cleaner Uninstaller"
 echo "========================================"
 echo ""
 
-read -p "Are you sure you want to uninstall Echo Clear? (y/N) " -n 1 -r
+read -p "Are you sure you want to uninstall Echo Cleaner? (y/N) " -n 1 -r
 echo ""
 
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -34,5 +34,5 @@ echo "  Uninstall Complete"
 echo "========================================"
 echo ""
 echo "The source files remain in this directory."
-echo "To completely remove Echo Clear, delete this folder."
+echo "To completely remove Echo Cleaner, delete this folder."
 echo ""

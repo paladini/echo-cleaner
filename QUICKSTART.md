@@ -1,4 +1,4 @@
-# Echo Clear - Quick Start Guide
+# Echo Cleaner - Quick Start Guide
 
 ## 🚀 Installation
 
@@ -18,7 +18,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## ▶️ Running Echo Clear
+## ▶️ Running Echo Cleaner
 
 ### Option 1: Direct Launch
 ```bash
@@ -81,7 +81,7 @@ python app/main.py
 ## ⚠️ Important Notes
 
 ### Safety
-- ✅ **Safe to use**: Echo Clear only removes cache and temporary files
+- ✅ **Safe to use**: Echo Cleaner only removes cache and temporary files
 - ⚠️ **Confirmation required**: You'll be asked before anything is deleted
 - 🔒 **No system files**: Won't touch system-critical files
 
@@ -93,7 +93,7 @@ python app/main.py
 ### Best Practices
 - 🔍 **Scan first**: Always scan before cleaning
 - 📊 **Review results**: Check what will be deleted
-- 💾 **Backup important data**: While Echo Clear is safe, backups are always good
+- 💾 **Backup important data**: While Echo Cleaner is safe, backups are always good
 - 🔄 **Regular cleaning**: Run weekly or monthly for best results
 
 ## 🐛 Troubleshooting

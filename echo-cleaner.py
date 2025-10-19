@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Echo Clear Launcher Script
+Echo Cleaner Launcher Script
 """
 
 import sys

@@ -1,5 +1,5 @@
 """
-UI Components for Echo Clear
+UI Components for Echo Cleaner
 """
 
 from .main_window import MainWindow

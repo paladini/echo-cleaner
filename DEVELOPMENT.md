@@ -105,7 +105,7 @@ echo-clear/
 
 ## Signal-Slot Communication
 
-Echo Clear uses Qt's signal-slot mechanism for communication:
+Echo Cleaner uses Qt's signal-slot mechanism for communication:
 
 ```
 UI Layer (MainWindow)

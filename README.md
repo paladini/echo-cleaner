@@ -1,4 +1,4 @@
-# Echo Clear 🧹
+# Echo Cleaner 🧹
 
 <p align="center">
   <strong>Intelligent System Cleaner for Linux</strong>
@@ -15,7 +15,7 @@
 
 ## 📋 About
 
-**Echo Clear** is a modern and efficient system cleaner for Linux, featuring an elegant and intuitive interface inspired by Apple's design philosophy. Designed for both regular users and developers, Echo Clear helps you reclaim disk space by intelligently identifying and removing:
+**Echo Cleaner** is a modern and efficient system cleaner for Linux, featuring an elegant and intuitive interface inspired by Apple's design philosophy. Designed for both regular users and developers, Echo Cleaner helps you reclaim disk space by intelligently identifying and removing:
 
 - 💾 **System caches** and temporary files
 - 🐳 **Docker artifacts** (images, containers, volumes)
@@ -160,7 +160,7 @@ See [QUICKSTART.md](QUICKSTART.md) for detailed instructions.
 
 ## 🏗️ Architecture
 
-Echo Clear follows a **layered architecture** based on **SOLID principles**:
+Echo Cleaner follows a **layered architecture** based on **SOLID principles**:
 
 ```
 ┌─────────────────────────────────────────┐
@@ -228,14 +228,14 @@ This will:
 
 ## 🔒 Safety & Privacy
 
-### What Echo Clear Does
+### What Echo Cleaner Does
 
 - ✅ Scans standard cache/temp directories
 - ✅ Shows what will be deleted before deleting
 - ✅ Requires confirmation for destructive operations
 - ✅ Handles errors gracefully
 
-### What Echo Clear Does NOT Do
+### What Echo Cleaner Does NOT Do
 
 - ❌ Does not collect any data
 - ❌ Does not connect to the internet
@@ -308,13 +308,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Echo Clear Team** - Initial work
+- **Echo Cleaner Team** - Initial work
 
 ## 🙏 Acknowledgments
 
 - Qt/PySide6 team for the excellent GUI framework
 - Linux community for inspiration and feedback
-- All contributors who help improve Echo Clear
+- All contributors who help improve Echo Cleaner
 
 ## 📧 Contact & Support
 
@@ -324,7 +324,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ⭐ Star History
 
-If you find Echo Clear useful, please consider giving it a star! ⭐
+If you find Echo Cleaner useful, please consider giving it a star! ⭐
 
 ---
 

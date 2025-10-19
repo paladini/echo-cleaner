@@ -15,7 +15,7 @@ from services.subcategory_service import SubcategoryService
 
 
 class MainWindow(QMainWindow):
-    """Main window for Echo Clear"""
+    """Main window for Echo Cleaner"""
     
     # Signals
     scan_requested = Signal()
@@ -32,7 +32,7 @@ class MainWindow(QMainWindow):
     def init_ui(self):
         """Initialize the main window interface"""
         # Window settings
-        self.setWindowTitle("Echo Clear - Intelligent System Cleaner")
+        self.setWindowTitle("Echo Cleaner - Intelligent System Cleaner")
         self.setMinimumSize(1000, 700)
         self.resize(1200, 800)
         
@@ -84,7 +84,7 @@ class MainWindow(QMainWindow):
         layout.addSpacing(10)
         
         # App Title
-        title = QLabel("Echo Clear")
+        title = QLabel("Echo Cleaner")
         title.setObjectName("appTitle")
         title.setAlignment(Qt.AlignCenter)
         title_font = QFont("Inter", 24, QFont.Bold)
@@ -220,14 +220,17 @@ class MainWindow(QMainWindow):
         layout.setSpacing(25)
         
         # Welcome message
-        welcome = QLabel("Welcome to Echo Clear")
+        layout.addSpacing(20)
+        
+        # Welcome message
+        welcome = QLabel("Welcome to Echo Cleaner")
         welcome.setObjectName("welcomeTitle")
         welcome_font = QFont("Inter", 20, QFont.Medium)
         welcome.setFont(welcome_font)
         layout.addWidget(welcome)
         
         description = QLabel(
-            "Echo Clear helps you reclaim disk space by cleaning system cache, "
+            "Echo Cleaner helps you reclaim disk space by cleaning system cache, "
             "unused packages, and development artifacts. Click 'Scan System' to begin."
         )
         description.setObjectName("description")

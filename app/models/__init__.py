@@ -1,5 +1,5 @@
 """
-Models Package - Data structures for Echo Clear
+Models Package - Data structures for Echo Cleaner
 """
 
 from .scan_item import ScanItem, SubcategoryGroup
