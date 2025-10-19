@@ -106,9 +106,12 @@ class ItemCheckboxWidget(QFrame):
         size_str = self._format_size(size)
         path = self.item_data.get('path', '')
         details_text = self.item_data.get('details', '')
+        requires_root = self.item_data.get('requires_root', False)
         
         # Build details string
         parts = [size_str]
+        if requires_root:
+            parts.append("🔒 Requires admin privileges")
         if details_text:
             parts.append(details_text)
         elif path and len(path) < 100:

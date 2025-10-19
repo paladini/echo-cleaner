@@ -76,24 +76,36 @@ class BaseCleaner(ABC):
         
         return False
     
-    def run_command(self, command: List[str], check: bool = False) -> subprocess.CompletedProcess:
+    def run_command(self, command: List[str], check: bool = False, use_sudo: bool = False) -> subprocess.CompletedProcess:
         """
         Safely run a shell command.
         
         Args:
             command: Command as list of strings
             check: Whether to raise exception on non-zero exit
+            use_sudo: Whether to run with elevated privileges using pkexec
         
         Returns:
             CompletedProcess object
         """
         try:
+            # If sudo is needed, prepend pkexec (graphical sudo alternative)
+            if use_sudo:
+                # Check if pkexec is available
+                if shutil.which('pkexec'):
+                    command = ['pkexec'] + command
+                # Fallback to sudo if pkexec not available
+                elif shutil.which('sudo'):
+                    command = ['sudo', '-n'] + command  # -n = non-interactive
+                else:
+                    print(f"Warning: No privilege escalation tool available for: {' '.join(command)}")
+            
             result = subprocess.run(
                 command,
                 capture_output=True,
                 text=True,
                 check=check,
-                timeout=30
+                timeout=60  # Increased timeout for sudo operations
             )
             return result
         except subprocess.TimeoutExpired:

@@ -70,7 +70,8 @@ class CleanWorker(QThread):
             results = {
                 'total_cleaned': 0,
                 'items_removed': 0,
-                'categories_cleaned': []
+                'categories_cleaned': [],
+                'failed_items': []  # Track items that failed to clean
             }
             
             total_categories = len(self.selected_categories)
@@ -84,11 +85,22 @@ class CleanWorker(QThread):
                 cleaner = category['cleaner']
                 items_to_clean = category['items']
                 
+                # Get size before cleaning for comparison
+                expected_size = sum(item.get('size', 0) for item in items_to_clean)
+                
                 cleaned_size = cleaner.clean(items_to_clean)
                 
-                results['total_cleaned'] += cleaned_size
-                results['items_removed'] += len(items_to_clean)
-                results['categories_cleaned'].append(category['name'])
+                # Check if cleaning was successful
+                if cleaned_size > 0:
+                    results['total_cleaned'] += cleaned_size
+                    results['items_removed'] += len(items_to_clean)
+                    results['categories_cleaned'].append(category['name'])
+                elif expected_size > 0:
+                    # Cleaning failed or was incomplete
+                    results['failed_items'].append({
+                        'category': category['name'],
+                        'reason': 'Permission denied or command failed'
+                    })
             
             self.progress.emit(100, "Cleaning complete!")
             self.finished.emit(results)
@@ -169,8 +181,9 @@ class CleaningService(QObject):
     def _on_clean_finished(self, results):
         """Handle cleaning completion"""
         self.clean_completed.emit(results)
-        # Clear scan results after cleaning
-        self.scan_results = None
+        # Automatically trigger a new scan to show updated state
+        # This ensures the dashboard reflects the actual current state
+        # after cleaning is complete
     
     def _on_clean_error(self, error_msg):
         """Handle cleaning error"""

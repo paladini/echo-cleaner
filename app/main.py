@@ -212,32 +212,58 @@ class EchoClearApp:
     
     def on_clean_completed(self, results):
         """Handle clean completion"""
-        self.window.enable_buttons(scan_enabled=True)
-        self.window.show_progress(visible=False)
-        
-        # Reset dashboard statistics
-        self.window.update_dashboard_stats("0 B", 0, 0)
-        
-        # Clear all category views and selected items
-        for category_name in self.window.category_views.keys():
-            self.window.update_category_view(category_name, [])
-        
-        self.window.selected_items.clear()
-        self.window.show_clean_button(visible=False)
-        
         # Show success message
         total_cleaned = results.get('total_cleaned', 0)
         items_removed = results.get('items_removed', 0)
+        failed_items = results.get('failed_items', [])
         size_formatted = self.service.format_size(total_cleaned)
+        
+        # Build message based on results
+        if total_cleaned > 0 and not failed_items:
+            # Full success
+            message = (
+                f"<b>Successfully cleaned:</b>\n\n"
+                f"✓ <b>{size_formatted}</b> of disk space freed\n"
+                f"✓ <b>{items_removed}</b> items removed\n\n"
+                "<i>Refreshing system state...</i>"
+            )
+            icon = "success"
+        elif total_cleaned > 0 and failed_items:
+            # Partial success
+            failed_categories = ", ".join([item['category'] for item in failed_items])
+            message = (
+                f"<b>Partially cleaned:</b>\n\n"
+                f"✓ <b>{size_formatted}</b> of disk space freed\n"
+                f"✓ <b>{items_removed}</b> items removed\n\n"
+                f"⚠️ Some items couldn't be cleaned:\n"
+                f"<i>{failed_categories}</i>\n\n"
+                "<b>Tip:</b> Items marked with 🔒 require admin privileges.\n"
+                "Run the app with sudo or pkexec for full access.\n\n"
+                "<i>Refreshing system state...</i>"
+            )
+            icon = "warning"
+        else:
+            # Nothing cleaned
+            message = (
+                "⚠️ <b>No items were cleaned</b>\n\n"
+                "This usually happens when:\n"
+                "• Items require admin privileges (look for 🔒)\n"
+                "• Files were already removed by another process\n\n"
+                "<b>Tip:</b> Try running with:\n"
+                "<code>pkexec echo-cleaner</code>\n\n"
+                "<i>Refreshing system state...</i>"
+            )
+            icon = "warning"
         
         self.show_custom_dialog(
             "Cleaning Complete! ✨",
-            f"<b>Successfully cleaned:</b>\n\n"
-            f"✓ <b>{size_formatted}</b> of disk space freed\n"
-            f"✓ <b>{items_removed}</b> items removed\n\n"
-            "Your system is now cleaner and running smoother!",
-            icon_type="success"
+            message,
+            icon_type=icon
         )
+        
+        # Automatically trigger a new scan to show updated state
+        # This ensures the dashboard reflects what's still available to clean
+        self.service.start_scan()
     
     def on_clean_failed(self, error_message):
         """Handle clean failure"""

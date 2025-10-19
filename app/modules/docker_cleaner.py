@@ -294,23 +294,37 @@ class DockerCleaner(BaseCleaner):
             path = item['path']
             
             if item_type == 'docker_image':
+                # Try to remove image, if it fails due to conflict, force it
                 result = self.run_command(['docker', 'rmi', path])
+                if result.returncode != 0 and 'conflict' in result.stderr.lower():
+                    # Image is being used by a stopped container, force removal
+                    print(f"Image {path} in use, forcing removal...")
+                    result = self.run_command(['docker', 'rmi', '-f', path])
+                
                 if result.returncode == 0:
                     total_cleaned += size
+                else:
+                    print(f"Failed to remove image {path}: {result.stderr}")
             
             elif item_type == 'docker_container':
                 result = self.run_command(['docker', 'rm', path])
                 if result.returncode == 0:
                     total_cleaned += size
+                else:
+                    print(f"Failed to remove container {path}: {result.stderr}")
             
             elif item_type == 'docker_volume':
                 result = self.run_command(['docker', 'volume', 'rm', path])
                 if result.returncode == 0:
                     total_cleaned += size
+                else:
+                    print(f"Failed to remove volume {path}: {result.stderr}")
             
             elif item_type == 'docker_build_cache':
                 result = self.run_command(['docker', 'builder', 'prune', '-f'])
                 if result.returncode == 0:
                     total_cleaned += size
+                else:
+                    print(f"Failed to clean build cache: {result.stderr}")
         
         return total_cleaned
