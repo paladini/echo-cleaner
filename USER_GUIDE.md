@@ -78,7 +78,7 @@ See [QUICKSTART.md](QUICKSTART.md) for detailed installation instructions.
 ### Step 1: Launch the Application
 
 ```bash
-./echo-clear.py
+./echo-cleaner.py
 ```
 
 The main window opens showing the Dashboard.
@@ -234,18 +234,18 @@ Echo Clear can be extended to support command-line arguments:
 
 ```bash
 # Future feature: scan only
-./echo-clear.py --scan-only
+./echo-cleaner.py --scan-only
 
 # Future feature: auto-clean
-./echo-clear.py --auto-clean
+./echo-cleaner.py --auto-clean
 
 # Future feature: dry run
-./echo-clear.py --dry-run
+./echo-cleaner.py --dry-run
 ```
 
 ### Configuration File
 
-Future versions will support a configuration file (`~/.config/echo-clear/config.json`):
+Future versions will support a configuration file (`~/.config/echo-cleaner/config.json`):
 
 ```json
 {
@@ -352,8 +352,8 @@ A: Open an issue on GitHub with:
 ## Support
 
 - 📖 Documentation: [README.md](README.md)
-- 🐛 Report bugs: [GitHub Issues](https://github.com/your-username/echo-clear/issues)
-- 💬 Discussions: [GitHub Discussions](https://github.com/your-username/echo-clear/discussions)
+- 🐛 Report bugs: [GitHub Issues](https://github.com/paladini/echo-cleaner/issues)
+- 💬 Discussions: [GitHub Discussions](https://github.com/paladini/echo-cleaner/discussions)
 - 🤝 Contribute: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---

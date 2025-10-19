@@ -127,7 +127,7 @@ make run
 
 **Using Python directly:**
 ```bash
-./echo-clear.py
+./echo-cleaner.py
 ```
 
 **Using AppImage:**
@@ -318,8 +318,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📧 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/echo-clear/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/echo-clear/discussions)
+- **Issues**: [GitHub Issues](https://github.com/paladini/echo-cleaner/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/paladini/echo-cleaner/discussions)
 - **Email**: [Add email here]
 
 ## ⭐ Star History

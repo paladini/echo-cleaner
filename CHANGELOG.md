@@ -34,4 +34,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ⚡ **Fast & Efficient**: Background processing
 - 🐳 **Developer-Friendly**: Cleans Docker, K8s, and language caches
 
-[0.1.0]: https://github.com/your-username/echo-clear/releases/tag/v0.1.0
+[0.1.0]: https://github.com/paladini/echo-cleaner/releases/tag/v0.1.0

@@ -7,8 +7,8 @@ Thank you for your interest in contributing to Echo Clear! 🎉
 1. **Fork the repository**
 2. **Clone your fork**:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/echo-clear.git
-   cd echo-clear
+   git clone https://github.com/paladini/echo-cleaner.git
+   cd echo-cleaner
    ```
 
 3. **Set up the development environment**:

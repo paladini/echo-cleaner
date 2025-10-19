@@ -1,5 +1,52 @@
 # Development Guide
 
+## 📦 Quick Start
+
+### Install Dependencies
+
+```bash
+# Using make (recommended)
+make install
+
+# Or using pip directly
+pip install -r requirements.txt
+```
+
+### Run the Application
+
+```bash
+# Using make
+make run
+
+# Or directly
+python3 echo-clear.py
+```
+
+### Available Commands (like npm scripts)
+
+```bash
+make help           # Show all available commands
+make install        # Install dependencies
+make run            # Run the application
+make build-appimage # Build AppImage for distribution
+make clean          # Clean build artifacts
+make test           # Run tests
+make format         # Format code with black
+make lint           # Lint code with flake8
+```
+
+### Dependency Management
+
+This project uses **`pyproject.toml`** (Python's equivalent to `package.json`):
+
+| Node.js          | Python                    |
+|------------------|---------------------------|
+| `package.json`   | `pyproject.toml`          |
+| `npm install`    | `make install`            |
+| `npm run build`  | `make build-appimage`     |
+| `npm run clean`  | `make clean`              |
+| `npm test`       | `make test`               |
+
 ## Project Structure
 
 ```

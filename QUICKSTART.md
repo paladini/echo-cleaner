@@ -5,14 +5,14 @@
 ### Method 1: Automated Installation (Recommended)
 
 ```bash
-cd echo-clear
+cd echo-cleaner
 ./install.sh
 ```
 
 ### Method 2: Manual Installation
 
 ```bash
-cd echo-clear
+cd echo-cleaner
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -22,7 +22,7 @@ pip install -r requirements.txt
 
 ### Option 1: Direct Launch
 ```bash
-./echo-clear.py
+./echo-cleaner.py
 ```
 
 ### Option 2: Python Command
@@ -134,8 +134,8 @@ sudo python3 app/main.py
 
 ## 🆘 Getting Help
 
-- **Issues**: [GitHub Issues](https://github.com/your-username/echo-clear/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/echo-clear/discussions)
+- **Issues**: [GitHub Issues](https://github.com/paladini/echo-cleaner/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/paladini/echo-cleaner/discussions)
 
 ## 🗑️ Uninstallation
 

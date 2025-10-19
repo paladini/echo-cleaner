@@ -56,7 +56,7 @@ mkdir -p "${APP_DIR}/usr/lib/python3/dist-packages"
 # Copiar aplicação
 echo -e "${YELLOW}Step 2: Copying application files...${NC}"
 cp -r app "${APP_DIR}/usr/lib/python3/dist-packages/"
-cp echo-clear.py "${APP_DIR}/usr/lib/python3/dist-packages/"
+cp echo-cleaner.py "${APP_DIR}/usr/lib/python3/dist-packages/"
 cp requirements.txt "${APP_DIR}/usr/lib/python3/dist-packages/"
 
 # Criar script executável principal
@@ -72,7 +72,7 @@ APPDIR="${HERE}/../../"
 export PYTHONPATH="${APPDIR}/usr/lib/python3/dist-packages:${PYTHONPATH}"
 
 # Usar o Python do sistema
-exec python3 "${APPDIR}/usr/lib/python3/dist-packages/echo-clear.py" "$@"
+exec python3 "${APPDIR}/usr/lib/python3/dist-packages/echo-cleaner.py" "$@"
 EOFBIN
 
 chmod +x "${APP_DIR}/usr/bin/${APP_NAME}"

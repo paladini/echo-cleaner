@@ -20,7 +20,7 @@ install-dev:
 	pip install -e ".[dev]"
 
 run:
-	python3 echo-clear.py
+	python3 echo-cleaner.py
 
 clean:
 	rm -rf build/
@@ -57,7 +57,7 @@ test:
 	pytest tests/ -v
 
 format:
-	black app/ echo-clear.py
+	black app/ echo-cleaner.py
 
 lint:
-	flake8 app/ echo-clear.py
+	flake8 app/ echo-cleaner.py
