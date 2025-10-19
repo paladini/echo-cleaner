@@ -2,6 +2,8 @@
 Main Window UI Component
 """
 
+import os
+from pathlib import Path
 from typing import List, Dict
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
@@ -9,7 +11,7 @@ from PySide6.QtWidgets import (
     QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea, QApplication
 )
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QFont
+from PySide6.QtGui import QFont, QPixmap
 from .subcategory_widget import SubcategoryGroupWidget, ItemCheckboxWidget
 from services.subcategory_service import SubcategoryService
 
@@ -66,21 +68,36 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(20, 30, 20, 20)
         layout.setSpacing(10)
         
-        # Logo/Icon placeholder
-        logo_container = QFrame()
-        logo_container.setObjectName("logoContainer")
-        logo_container.setFixedSize(80, 80)
-        logo_layout = QVBoxLayout(logo_container)
-        logo_layout.setContentsMargins(0, 0, 0, 0)
-        logo_layout.setAlignment(Qt.AlignCenter)
-        
-        # Logo icon (using emoji as placeholder until you add a real icon)
-        logo_icon = QLabel("✨")
+        # Logo/Icon - Direct QLabel without frame
+        logo_icon = QLabel()
         logo_icon.setAlignment(Qt.AlignCenter)
-        logo_icon.setStyleSheet("font-size: 48px;")
-        logo_layout.addWidget(logo_icon)
+        logo_icon.setScaledContents(False)  # Don't scale contents, we'll do it manually
         
-        layout.addWidget(logo_container, 0, Qt.AlignHCenter)
+        # Get path to logo image
+        assets_dir = Path(__file__).parent.parent / "assets"
+        logo_path = assets_dir / "logo.png"
+        
+        if logo_path.exists():
+            pixmap = QPixmap(str(logo_path))
+            # Use device pixel ratio for high DPI displays
+            device_ratio = self.devicePixelRatio()
+            # Scale to a larger size for better quality (120x120 logical pixels)
+            scaled_pixmap = pixmap.scaled(
+                int(120 * device_ratio), 
+                int(120 * device_ratio), 
+                Qt.KeepAspectRatio, 
+                Qt.SmoothTransformation
+            )
+            scaled_pixmap.setDevicePixelRatio(device_ratio)
+            logo_icon.setPixmap(scaled_pixmap)
+            logo_icon.setFixedSize(120, 120)
+        else:
+            # Fallback to emoji if logo not found
+            logo_icon.setText("✨")
+            logo_icon.setStyleSheet("font-size: 64px;")
+            logo_icon.setFixedSize(120, 120)
+        
+        layout.addWidget(logo_icon, 0, Qt.AlignHCenter)
         layout.addSpacing(10)
         
         # App Title
@@ -373,14 +390,6 @@ class MainWindow(QMainWindow):
             #sidebar {
                 background-color: #ffffff;
                 border-right: 1px solid #e5e5e7;
-            }
-            
-            #logoContainer {
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
-                    stop:0 rgba(0, 122, 255, 0.08),
-                    stop:1 rgba(0, 122, 255, 0.02));
-                border: 2px solid #e5e5e7;
-                border-radius: 16px;
             }
             
             #appTitle {
