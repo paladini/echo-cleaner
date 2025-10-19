@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "echo-clear"
-version = "0.2.0"
+version = "1.0.0"
 description = "Intelligent System Cleaner for Linux"
 readme = "README.md"
 requires-python = ">=3.8"
 license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    {name = "Fernando Paladini", email = "fnpaladini@gmail.com"}
 ]
 keywords = ["cleaner", "disk-space", "system", "cache", "docker", "linux"]
 classifiers = [
