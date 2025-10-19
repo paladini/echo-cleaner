@@ -40,14 +40,16 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/echo-clear.git
-cd echo-clear
+git clone https://github.com/paladini/echo-cleaner.git
+cd echo-cleaner
 
-# Install
-./install.sh
+# Install and run
+make install
+make run
 
-# Run
-./echo-clear.py
+# Or use AppImage (no installation)
+make build-appimage
+./EchoCleaner-x86_64.AppImage
 ```
 
 ## 🚀 Technologies
@@ -57,6 +59,8 @@ cd echo-clear
 - **Layered Architecture**: Based on SOLID principles
 - **Threading**: Non-blocking background operations
 - **Type Hints**: Modern, maintainable code
+- **Make + pyproject.toml**: Robust dependency management
+- **AppImage**: Universal Linux distribution format
 
 ## 📦 Installation
 
@@ -67,11 +71,11 @@ cd echo-clear
 - Optional: Docker (for Docker cleaning)
 - Optional: kubectl, minikube, etc. (for Kubernetes cleaning)
 
-### Quick Install
+### Method 1: Quick Install (Recommended)
 
 ```bash
-cd echo-clear
-./install.sh
+cd echo-cleaner
+./scripts/install.sh
 ```
 
 The script will:
@@ -80,27 +84,68 @@ The script will:
 - ✅ Install dependencies
 - ✅ Make scripts executable
 
-### Manual Installation
+### Method 2: Using Make
 
 ```bash
-cd echo-clear
+cd echo-cleaner
+make install
+```
+
+### Method 3: Manual Installation
+
+```bash
+cd echo-cleaner
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+```
+
+### Method 4: AppImage (No Installation Required)
+
+Download the latest AppImage from releases and run:
+
+```bash
+chmod +x EchoCleaner-x86_64.AppImage
+./EchoCleaner-x86_64.AppImage
+```
+
+Or build it yourself:
+
+```bash
+make build-appimage
+./EchoCleaner-x86_64.AppImage
 ```
 
 ## 🎮 Usage
 
 ### Launch the Application
 
+**Using Make:**
+```bash
+make run
+```
+
+**Using Python directly:**
 ```bash
 ./echo-clear.py
 ```
 
-Or:
+**Using AppImage:**
+```bash
+./EchoCleaner-x86_64.AppImage
+```
+
+### Developer Commands
 
 ```bash
-python3 app/main.py
+make help           # Show all available commands
+make install        # Install dependencies
+make run            # Run the application
+make build-appimage # Build AppImage for distribution
+make clean          # Clean build artifacts
+make test           # Run tests
+make format         # Format code
+make lint           # Lint code
 ```
 
 ### Basic Workflow
@@ -172,7 +217,7 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for architecture details.
 Run the test suite to verify all modules:
 
 ```bash
-./test.py
+make test
 ```
 
 This will:
