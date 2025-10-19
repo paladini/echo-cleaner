@@ -57,13 +57,14 @@ cat > "${APP_DIR}/usr/bin/${APP_NAME}" << 'EOFBIN'
 #!/bin/bash
 SELF=$(readlink -f "$0")
 HERE=${SELF%/*}
-APP_DIR="${HERE}/../"
+# Ir para o diretório raiz do AppImage (../../ a partir de usr/bin)
+APPDIR="${HERE}/../../"
 
 # Adicionar Python ao PATH
-export PYTHONPATH="${APP_DIR}/usr/lib/python3/dist-packages:${PYTHONPATH}"
+export PYTHONPATH="${APPDIR}/usr/lib/python3/dist-packages:${PYTHONPATH}"
 
 # Usar o Python do sistema
-exec python3 "${APP_DIR}/usr/lib/python3/dist-packages/echo-clear.py" "$@"
+exec python3 "${APPDIR}/usr/lib/python3/dist-packages/echo-clear.py" "$@"
 EOFBIN
 
 chmod +x "${APP_DIR}/usr/bin/${APP_NAME}"
