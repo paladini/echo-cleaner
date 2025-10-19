@@ -944,7 +944,7 @@ class MainWindow(QMainWindow):
         github_button.setCursor(Qt.PointingHandCursor)
         github_font = QFont("Inter", 13, QFont.DemiBold)
         github_button.setFont(github_font)
-        github_button.clicked.connect(lambda: self.open_url("https://github.com/paladini/echo-clear"))
+        github_button.clicked.connect(lambda: self.open_url("https://github.com/paladini/echo-cleaner"))
         buttons_layout.addWidget(github_button)
         
         sponsor_button = QPushButton("💖  Sponsor this Project")

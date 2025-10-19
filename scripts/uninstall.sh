@@ -23,8 +23,8 @@ fi
 
 echo ""
 echo "🗑️  Removing desktop entry..."
-if [ -f "$HOME/.local/share/applications/echo-clear.desktop" ]; then
-    rm "$HOME/.local/share/applications/echo-clear.desktop"
+if [ -f "$HOME/.local/share/applications/echo-cleaner.desktop" ]; then
+    rm "$HOME/.local/share/applications/echo-cleaner.desktop"
     echo "✅ Desktop entry removed"
 fi
 

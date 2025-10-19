@@ -48,14 +48,14 @@ echo "✅ Dependencies installed"
 echo ""
 
 # Make launcher executable
-chmod +x echo-clear.py
+chmod +x echo-cleaner.py
 
 echo "========================================"
 echo "  Installation Complete! ✨"
 echo "========================================"
 echo ""
 echo "To run Echo Clear:"
-echo "  ./echo-clear.py"
+echo "  ./echo-cleaner.py"
 echo ""
 echo "Or:"
 echo "  python3 app/main.py"

@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "echo-clear"
+name = "echo-cleaner"
 version = "1.0.0"
 description = "Intelligent System Cleaner for Linux"
 readme = "README.md"
@@ -49,7 +49,7 @@ Repository = "https://github.com/paladini/echo-cleaner"
 Issues = "https://github.com/paladini/echo-cleaner/issues"
 
 [project.scripts]
-echo-clear = "app.main:main"
+echo-cleaner = "app.main:main"
 
 [tool.setuptools]
 packages = ["app", "app.models", "app.modules", "app.services", "app.ui"]
