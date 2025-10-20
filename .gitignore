@@ -47,3 +47,7 @@ Thumbs.db
 
 # Build tools (downloaded automatically)
 tools/
+RELEASE_NOTES_v1.1.0.md
+GITHUB_RELEASE_INSTRUCTIONS.md
+VERSION_SUMMARY.md
+RELEASE_CHECKLIST_v1.1.0.md

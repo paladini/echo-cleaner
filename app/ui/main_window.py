@@ -27,6 +27,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.scan_results = None
         self.selected_items = {}
+        self.current_category = None  # Track current category for header clean button
         self.subcategory_service = SubcategoryService()
         self.init_ui()
         self.apply_styles()
@@ -213,9 +214,17 @@ class MainWindow(QMainWindow):
         self.page_title.setFont(title_font)
         layout.addWidget(self.page_title)
         
+        # Selection summary badge (hidden by default)
+        self.header_selection_badge = QLabel("")
+        self.header_selection_badge.setObjectName("headerSelectionBadge")
+        self.header_selection_badge.setVisible(False)
+        badge_font = QFont("Inter", 11, QFont.Medium)
+        self.header_selection_badge.setFont(badge_font)
+        layout.addWidget(self.header_selection_badge)
+        
         layout.addStretch()
         
-        # Action buttons
+        # Scan button (visible only on Dashboard)
         self.scan_button = QPushButton("🔍 Scan System")
         self.scan_button.setObjectName("scanButton")
         self.scan_button.setMinimumSize(160, 50)
@@ -224,6 +233,17 @@ class MainWindow(QMainWindow):
         self.scan_button.setCursor(Qt.PointingHandCursor)
         self.scan_button.clicked.connect(self.scan_requested.emit)
         layout.addWidget(self.scan_button)
+        
+        # Clean button for category pages (hidden by default)
+        self.header_clean_button = QPushButton("🧹 Clean Selected")
+        self.header_clean_button.setObjectName("headerCleanButton")
+        self.header_clean_button.setMinimumSize(160, 50)
+        clean_font = QFont("Inter", 13, QFont.Medium)
+        self.header_clean_button.setFont(clean_font)
+        self.header_clean_button.setCursor(Qt.PointingHandCursor)
+        self.header_clean_button.setVisible(False)
+        self.header_clean_button.clicked.connect(self.on_header_clean_clicked)
+        layout.addWidget(self.header_clean_button)
         
         return header
     
@@ -298,13 +318,8 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(20)
         
-        # Action buttons container (Clean + Select/Deselect All)
-        buttons_container = QWidget()
-        buttons_layout = QVBoxLayout(buttons_container)
-        buttons_layout.setSpacing(15)
-        buttons_layout.setContentsMargins(0, 0, 0, 0)
-        
         # Clean button (hidden by default, shown after scan)
+        # Now using a more elegant single-button design
         self.clean_button = QPushButton("🧹 Clean Selected Items")
         self.clean_button.setObjectName("cleanButton")
         self.clean_button.setMinimumSize(200, 60)
@@ -313,20 +328,7 @@ class MainWindow(QMainWindow):
         self.clean_button.setCursor(Qt.PointingHandCursor)
         self.clean_button.setVisible(False)
         self.clean_button.clicked.connect(self.on_clean_button_clicked)
-        buttons_layout.addWidget(self.clean_button, alignment=Qt.AlignCenter)
-        
-        # Toggle selection button (hidden by default, shown after scan)
-        self.toggle_selection_button = QPushButton("☑️ Deselect All Items")
-        self.toggle_selection_button.setObjectName("toggleSelectionButton")
-        self.toggle_selection_button.setMinimumSize(180, 40)
-        toggle_font = QFont("Inter", 12)
-        self.toggle_selection_button.setFont(toggle_font)
-        self.toggle_selection_button.setCursor(Qt.PointingHandCursor)
-        self.toggle_selection_button.setVisible(False)
-        self.toggle_selection_button.clicked.connect(self.on_toggle_all_selection)
-        buttons_layout.addWidget(self.toggle_selection_button, alignment=Qt.AlignCenter)
-        
-        layout.addWidget(buttons_container)
+        layout.addWidget(self.clean_button, alignment=Qt.AlignCenter)
         
         # Selected items summary
         self.selected_summary = QLabel("")
@@ -489,22 +491,41 @@ class MainWindow(QMainWindow):
                 color: #86868b;
             }
             
-            #toggleSelectionButton, #selectAllButton, #deselectAllButton {
-                background-color: #f5f5f7;
-                color: #1d1d1f;
-                border: 1px solid #d2d2d7;
-                border-radius: 10px;
-                padding: 10px 24px;
-                font-weight: 500;
+            /* Header selection badge */
+            #headerSelectionBadge {
+                background-color: rgba(0, 122, 255, 0.1);
+                color: #007aff;
+                border: 1px solid rgba(0, 122, 255, 0.2);
+                border-radius: 12px;
+                padding: 6px 16px;
+                margin-left: 12px;
+                font-weight: 600;
             }
             
-            #toggleSelectionButton:hover, #selectAllButton:hover, #deselectAllButton:hover {
+            /* Header clean button (for category pages) */
+            #headerCleanButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #34c759, stop:1 #2da94b);
+                color: #ffffff;
+                border: none;
+                border-radius: 12px;
+                padding: 12px 24px;
+                font-weight: 600;
+                text-align: center;
+            }
+            
+            #headerCleanButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #2da94b, stop:1 #268f3f);
+            }
+            
+            #headerCleanButton:pressed {
+                background: #268f3f;
+            }
+            
+            #headerCleanButton:disabled {
                 background-color: #e8e8ed;
-                border-color: #007aff;
-            }
-            
-            #toggleSelectionButton:pressed, #selectAllButton:pressed, #deselectAllButton:pressed {
-                background-color: #d2d2d7;
+                color: #86868b;
             }
             
             #selectedSummary {
@@ -792,6 +813,21 @@ class MainWindow(QMainWindow):
         if index < len(category_names):
             self.page_title.setText(category_names[index])
             self.stacked_widget.setCurrentIndex(index)
+            
+            # Store current category for clean button functionality
+            self.current_category = category_names[index] if index > 0 and index < 8 else None
+            
+            # Show/hide appropriate header button based on page
+            if index == 0:  # Dashboard
+                self.scan_button.setVisible(True)
+                self.header_clean_button.setVisible(False)
+            elif index == 8:  # About page
+                self.scan_button.setVisible(False)
+                self.header_clean_button.setVisible(False)
+            else:  # Category pages
+                self.scan_button.setVisible(False)
+                # Clean button visibility will be updated by update_category_clean_buttons()
+                self.update_header_clean_button_visibility()
     
     def create_category_view(self, category_name):
         """Create a category detail view"""
@@ -1303,80 +1339,79 @@ class MainWindow(QMainWindow):
             self.selected_summary.setVisible(True)
             self.clean_button.setEnabled(False)
         
-        # Update toggle button text
-        self.update_toggle_button_text()
+        # Update header badge and category buttons
+        self.update_header_selection_badge()
+        self.update_category_clean_buttons()
     
-    def update_toggle_button_text(self):
-        """Update toggle button text based on current selection state"""
+    def update_header_selection_badge(self):
+        """Update the header selection badge with selected items summary"""
         total_items = 0
         selected_items = 0
+        selected_size = 0
         
         for category_items in self.selected_items.values():
             for item in category_items.values():
                 total_items += 1
                 if item['selected']:
                     selected_items += 1
+                    # Get size from the item data
+                    item_data = item.get('data', {})
+                    selected_size += item_data.get('size', 0)
         
         if selected_items == 0:
-            # All deselected - show "Select All"
-            self.toggle_selection_button.setText("☑️ Select All Items")
-            self.toggle_selection_button.setObjectName("selectAllButton")
-        elif selected_items == total_items:
-            # All selected - show "Deselect All"
-            self.toggle_selection_button.setText("☐ Deselect All Items")
-            self.toggle_selection_button.setObjectName("deselectAllButton")
+            self.header_selection_badge.setVisible(False)
         else:
-            # Partially selected - show "Deselect All" (default action)
-            self.toggle_selection_button.setText("☐ Deselect All Items")
-            self.toggle_selection_button.setObjectName("deselectAllButton")
-        
-        # Reapply styles
-        self.toggle_selection_button.style().unpolish(self.toggle_selection_button)
-        self.toggle_selection_button.style().polish(self.toggle_selection_button)
+            from humanize import naturalsize
+            size_str = naturalsize(selected_size, binary=True)
+            self.header_selection_badge.setText(f"✓ {selected_items} selected • {size_str}")
+            self.header_selection_badge.setVisible(True)
     
-    def on_toggle_all_selection(self):
-        """Toggle all items selection across all categories"""
-        # Check current state
-        total_items = 0
-        selected_items = 0
-        
-        for category_items in self.selected_items.values():
-            for item in category_items.values():
-                total_items += 1
-                if item['selected']:
-                    selected_items += 1
-        
-        # Decide action: if all selected, deselect all. Otherwise, select all
-        new_state = (selected_items == 0)
-        
-        # Apply to all items
-        for category_name, category_items in self.selected_items.items():
-            for item_idx in category_items.keys():
-                self.selected_items[category_name][item_idx]['selected'] = new_state
-        
-        # Update all checkboxes in UI
-        self._update_all_checkboxes(new_state)
-        
-        # Update visuals for all categories
-        for category_name in self.selected_items.keys():
-            self.update_category_selection_visuals(category_name)
-        
-        # Update summary
-        self.update_selection_summary()
+    def update_category_clean_buttons(self):
+        """Update header clean button visibility based on current category"""
+        # This method is now simpler - just update the header clean button
+        self.update_header_clean_button_visibility()
     
-    def _update_all_checkboxes(self, checked: bool):
-        """Update all checkbox widgets to match the new state"""
-        # Find all ItemCheckboxWidget instances and update them
-        for category_name, view in self.category_views.items():
-            # Find all checkbox widgets in the view
-            items_container = view.findChild(QWidget, f"itemsContainer_{category_name}")
-            if items_container:
-                checkboxes = items_container.findChildren(QCheckBox)
-                for checkbox in checkboxes:
-                    if checkbox.objectName().startswith("checkbox_"):
-                        checkbox.blockSignals(True)  # Prevent signal spam
-                        checkbox.setChecked(checked)
-                        checkbox.blockSignals(False)
+    def update_header_clean_button_visibility(self):
+        """Update the header clean button visibility for current category"""
+        # Only show on category pages (not Dashboard or About)
+        current_index = self.stacked_widget.currentIndex()
+        
+        # Dashboard = 0, About = 8, Categories = 1-7
+        if current_index == 0 or current_index == 8:
+            self.header_clean_button.setVisible(False)
+            return
+        
+        # Check if current category has selected items
+        if hasattr(self, 'current_category') and self.current_category:
+            selected_count = 0
+            if self.current_category in self.selected_items:
+                for item in self.selected_items[self.current_category].values():
+                    if item['selected']:
+                        selected_count += 1
+            
+            self.header_clean_button.setVisible(selected_count > 0)
+        else:
+            self.header_clean_button.setVisible(False)
+    
+    def on_header_clean_clicked(self):
+        """Handle header clean button click - cleans current category"""
+        if not hasattr(self, 'current_category') or not self.current_category:
+            return
+        
+        # Build selected items dict for current category only
+        selected_for_cleaning = {}
+        
+        if self.current_category in self.selected_items:
+            selected_items = []
+            for item_data in self.selected_items[self.current_category].values():
+                if item_data['selected']:
+                    selected_items.append(item_data['data'])
+            
+            if selected_items:
+                selected_for_cleaning[self.current_category] = selected_items
+        
+        if selected_for_cleaning:
+            self.clean_requested.emit(selected_for_cleaning)
     
     def on_clean_button_clicked(self):
         """Handle clean button click"""
@@ -1396,14 +1431,15 @@ class MainWindow(QMainWindow):
             self.clean_requested.emit(selected_for_cleaning)
     
     def show_clean_button(self, visible=True):
-        """Show or hide the clean button and toggle selection button on dashboard"""
+        """Show or hide the clean button on dashboard"""
         self.clean_button.setVisible(visible)
-        self.toggle_selection_button.setVisible(visible)
         if visible:
             self.update_selection_summary()
-            self.update_toggle_button_text()
+            self.update_header_selection_badge()
+            self.update_category_clean_buttons()
         else:
             self.selected_summary.setVisible(False)
+            self.header_selection_badge.setVisible(False)
     
     def format_size(self, size_bytes):
         """Format bytes to human readable"""
