@@ -225,7 +225,8 @@ class MainWindow(QMainWindow):
         self.header_selection_badge = QLabel("")
         self.header_selection_badge.setObjectName("headerSelectionBadge")
         self.header_selection_badge.setVisible(False)
-        self.header_selection_badge.setMinimumHeight(36)  # Minimum height, can grow if needed
+        self.header_selection_badge.setFixedHeight(40)  # Fixed height to prevent jumping
+        self.header_selection_badge.setAlignment(Qt.AlignCenter)  # Center text
         badge_font = QFont("Inter", 11, QFont.Medium)
         self.header_selection_badge.setFont(badge_font)
         layout.addWidget(self.header_selection_badge)
