@@ -6,7 +6,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -22,6 +21,7 @@ wheels/
 
 # Virtual Environment
 venv/
+.venv/
 ENV/
 env/
 
@@ -38,16 +38,21 @@ Thumbs.db
 
 # Logs
 *.log
+app_debug.log
 
 # Distribution / packaging
+dist/*.AppImage
+dist/*.sha256
 *.deb
 *.snap
 *.flatpak
-*.AppImage
 
 # Build tools (downloaded automatically)
-tools/
-RELEASE_NOTES_v1.1.0.md
-GITHUB_RELEASE_INSTRUCTIONS.md
+tools/appimagetool-*.AppImage
+
+# Temporary release files (keep templates in docs/release-notes/)
+RELEASE_NOTES_v*.md
+RELEASE_CHECKLIST_v*.md
+RELEASE_SUMMARY_v*.md
+GITHUB_RELEASE_*.md
 VERSION_SUMMARY.md
-RELEASE_CHECKLIST_v1.1.0.md

@@ -36,21 +36,22 @@
 - 🔒 **Safe Operations**: Confirmation dialogs and error handling
 - 📊 **Visual Feedback**: Progress bars and statistics cards
 
-## 🎬 Quick Demo
+## 🎬 Quick Start
+
+**Download and run - it's that simple!**
 
 ```bash
-# Clone the repository
-git clone https://github.com/paladini/echo-cleaner.git
-cd echo-cleaner
+# Download the latest release
+wget https://github.com/paladini/echo-cleaner/releases/latest/download/EchoCleaner-1.2.0-x86_64.AppImage
 
-# Install and run
-make install
-make run
+# Make it executable
+chmod +x EchoCleaner-1.2.0-x86_64.AppImage
 
-# Or use AppImage (no installation)
-make build-appimage
-./EchoCleaner-x86_64.AppImage
+# Run it!
+./EchoCleaner-1.2.0-x86_64.AppImage
 ```
+
+No installation required. No dependencies to manage. Just download and run.
 
 ## 🚀 Technologies
 
@@ -64,99 +65,83 @@ make build-appimage
 
 ## 📦 Installation
 
-### Prerequisites
+### AppImage (Recommended - No Installation!)
 
-- Python 3.10 or higher
-- pip (Python package manager)
-- Optional: Docker (for Docker cleaning)
-- Optional: kubectl, minikube, etc. (for Kubernetes cleaning)
+AppImage is a universal Linux application format that runs anywhere. No installation, no dependencies, no root required.
 
-### Method 1: Quick Install (Recommended)
-
+**1. Download**
 ```bash
-cd echo-cleaner
-./scripts/install.sh
+wget https://github.com/paladini/echo-cleaner/releases/latest/download/EchoCleaner-1.2.0-x86_64.AppImage
 ```
 
-The script will:
-- ✅ Check Python version
-- ✅ Create virtual environment
-- ✅ Install dependencies
-- ✅ Make scripts executable
-
-### Method 2: Using Make
-
+**2. Make executable**
 ```bash
-cd echo-cleaner
-make install
+chmod +x EchoCleaner-1.2.0-x86_64.AppImage
 ```
 
-### Method 3: Manual Installation
+**3. Run**
+```bash
+./EchoCleaner-1.2.0-x86_64.AppImage
+```
+
+That's it! The AppImage includes everything needed to run Echo Cleaner.
+
+**Optional: Integrate with your system**
+
+To add Echo Cleaner to your application menu:
+```bash
+# Move to a permanent location
+mkdir -p ~/.local/bin
+mv EchoCleaner-1.2.0-x86_64.AppImage ~/.local/bin/EchoCleaner.AppImage
+
+# Make it available from anywhere
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+Now you can launch it from your application menu or by typing `EchoCleaner.AppImage` in the terminal.
+
+### From Source (For Developers)
+
+If you want to contribute or modify the code:
 
 ```bash
+git clone https://github.com/paladini/echo-cleaner.git
 cd echo-cleaner
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-### Method 4: AppImage (No Installation Required)
-
-Download the latest AppImage from releases and run:
-
-```bash
-chmod +x EchoCleaner-x86_64.AppImage
-./EchoCleaner-x86_64.AppImage
-```
-
-Or build it yourself:
-
-```bash
-make build-appimage
-./EchoCleaner-x86_64.AppImage
+./echo-cleaner.py
 ```
 
 ## 🎮 Usage
 
-### Launch the Application
+### Running Echo Cleaner
 
-**Using Make:**
+**With AppImage:**
 ```bash
-make run
+./EchoCleaner-1.2.0-x86_64.AppImage
 ```
 
-**Using Python directly:**
+**From source:**
 ```bash
 ./echo-cleaner.py
 ```
 
-**Using AppImage:**
-```bash
-./EchoCleaner-x86_64.AppImage
-```
+### How It Works
 
-### Developer Commands
+1. **Scan System** - Click the button to analyze your system
+2. **Review Categories** - See what can be cleaned (System Cache, Docker, etc.)
+3. **Select Items** - Choose what you want to remove
+4. **Clean** - Click "Clean Selected" and confirm
+5. **Done!** - View how much space you freed
 
-```bash
-make help           # Show all available commands
-make install        # Install dependencies
-make run            # Run the application
-make build-appimage # Build AppImage for distribution
-make clean          # Clean build artifacts
-make test           # Run tests
-make format         # Format code
-make lint           # Lint code
-```
+### Tips
 
-### Basic Workflow
-
-1. **Click "Scan System"** - Analyzes your system
-2. **Review Results** - See what can be cleaned
-3. **Click "Clean Now"** - Removes selected items
-4. **Confirm** - Verify the operation
-5. **Done!** - View cleaning results
-
-See [QUICKSTART.md](QUICKSTART.md) for detailed instructions.
+- 💡 Click category badges to select/deselect all items
+- 💡 Hover over items to see detailed information
+- 💡 Categories with no items show "All Clean!" message
+- 💡 The app automatically rescans after cleaning
 
 ## 🏗️ Architecture
 
@@ -172,13 +157,28 @@ Echo Cleaner follows a **layered architecture** based on **SOLID principles**:
 └─────────────────────────────────────────┘
 ```
 
-### Key Principles
+See [DEVELOPMENT.md](docs/guides/DEVELOPMENT.md) for details.
 
-- **Single Responsibility**: Each module has one job
-- **Open/Closed**: Extend by adding new cleaners
-- **Dependency Inversion**: Depend on abstractions (BaseCleaner)
+## 📁 Project Structure
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for architecture details.
+```
+echo-cleaner/
+├── app/                    # Application source code
+│   ├── models/            # Data models
+│   ├── modules/           # Cleaning modules
+│   ├── services/          # Business logic
+│   └── ui/                # User interface
+├── data/                  # Application metadata (FreeDesktop.org standards)
+│   ├── icons/             # Application icons
+│   ├── *.desktop          # Desktop entry
+│   └── *.metainfo.xml     # AppStream metadata
+├── dist/                  # Built packages (AppImages, checksums)
+├── docs/                  # Documentation
+│   ├── guides/            # Development and user guides
+│   └── release-notes/     # Release documentation
+├── scripts/               # Build and deployment scripts
+└── tools/                 # External build tools
+```
 
 ## 🛠️ Cleaning Modules
 
@@ -206,25 +206,20 @@ See [DEVELOPMENT.md](DEVELOPMENT.md) for architecture details.
 
 ## 📚 Documentation
 
-- 📖 [Quick Start Guide](QUICKSTART.md) - Get started in 5 minutes
-- 📘 [User Guide](USER_GUIDE.md) - Comprehensive usage documentation
-- 🔧 [Development Guide](DEVELOPMENT.md) - Architecture and development info
-- 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute
+-  [Development Guide](docs/guides/DEVELOPMENT.md) - Architecture and development
+- 🤝 [Contributing Guide](docs/guides/CONTRIBUTING.md) - How to contribute
 - 📝 [Changelog](CHANGELOG.md) - Version history
+- 📸 [Screenshots](docs/SCREENSHOTS.md) - Visual overview
 
 ## 🧪 Testing
 
-Run the test suite to verify all modules:
+If you're running from source, you can test the cleaning modules:
 
 ```bash
 make test
 ```
 
-This will:
-- Test each cleaning module
-- Show what would be cleaned
-- Estimate space savings
-- **Not delete anything** (dry run by default)
+This will show what would be cleaned without actually deleting anything.
 
 ## 🔒 Safety & Privacy
 
@@ -247,60 +242,39 @@ All operations are **local only** and **fully transparent**.
 
 ## 🐛 Troubleshooting
 
-### Permission Errors
+### AppImage Won't Run
 
-For Docker operations:
+Make sure it's executable:
+```bash
+chmod +x EchoCleaner-1.2.0-x86_64.AppImage
+```
+
+If you get "FUSE" errors on older systems:
+```bash
+./EchoCleaner-1.2.0-x86_64.AppImage --appimage-extract-and-run
+```
+
+### Permission Errors During Cleaning
+
+**For Docker operations:**
 ```bash
 sudo usermod -aG docker $USER
 # Log out and back in
 ```
 
-For package manager cleaning:
-```bash
-sudo python3 app/main.py
-```
+**For system package cache:**
+- The app will automatically request sudo password when needed
 
-### Qt/UI Issues
+### Missing Features
 
-Install Qt dependencies:
-```bash
-# Ubuntu/Debian
-sudo apt install python3-pyqt6
-
-# Fedora
-sudo dnf install python3-qt6
-
-# Arch
-sudo pacman -S python-pyqt6
-```
-
-See [USER_GUIDE.md](USER_GUIDE.md) for more troubleshooting.
-
-## �️ Roadmap
-
-### v0.2.0 (Planned)
-- [ ] Per-item selection in categories
-- [ ] Detailed file list view
-- [ ] Export scan results
-- [ ] Custom exclusion lists
-
-### v1.0.0 (Future)
-- [ ] Scheduled automatic cleaning
-- [ ] System tray integration
-- [ ] CLI interface
-- [ ] Configuration file support
-- [ ] Undo functionality (where possible)
-- [ ] Multi-language support
-- [ ] Flatpak/Snap packages
+Some cleaning modules only appear if the related tools are installed:
+- **Docker**: Requires Docker to be installed
+- **Kubernetes**: Requires kubectl, minikube, or kind
+- **Development Dependencies**: Only shows if cache directories exist
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
-
-- Code style guidelines
-- How to add new cleaning modules
-- Pull request process
-- Development setup
+Contributions are welcome! Please read [CONTRIBUTING.md](docs/guides/CONTRIBUTING.md) for details on how to contribute.
 
 ## 📝 License
 
@@ -308,7 +282,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors
 
-- **Echo Cleaner Team** - Initial work
+- **Fernando Paladini** - [github.com/paladini](https://github.com/paladini)
+- Built with GitHub Copilot
 
 ## 🙏 Acknowledgments
 
@@ -320,7 +295,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Issues**: [GitHub Issues](https://github.com/paladini/echo-cleaner/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/paladini/echo-cleaner/discussions)
-- **Email**: [Add email here]
 
 ## ⭐ Star History
 

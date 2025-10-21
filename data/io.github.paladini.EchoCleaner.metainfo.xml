@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.paladini.EchoCleaner</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  
+  <name>Echo Cleaner</name>
+  <summary>Intelligent system cleaner for Linux</summary>
+  
+  <description>
+    <p>
+      Echo Cleaner is a modern, elegant system cleaning tool designed for Linux users,
+      with special focus on developers. It helps you reclaim disk space by safely
+      removing unnecessary files, caches, and temporary data.
+    </p>
+    <p>Features:</p>
+    <ul>
+      <li>Smart system cache cleaning (package managers, logs, trash)</li>
+      <li>Docker cleanup (dangling images, stopped containers, unused volumes)</li>
+      <li>Kubernetes local cluster cleanup (minikube, kind)</li>
+      <li>Development dependencies cleanup (npm, gradle, maven caches)</li>
+      <li>Beautiful, intuitive interface with contextual controls</li>
+      <li>Real-time preview of what will be deleted</li>
+      <li>Selective cleaning - choose exactly what to remove</li>
+    </ul>
+  </description>
+  
+  <launchable type="desktop-id">io.github.paladini.EchoCleaner.desktop</launchable>
+  
+  <screenshots>
+    <screenshot type="default">
+      <caption>Main dashboard showing disk space analysis</caption>
+      <image>https://raw.githubusercontent.com/paladini/echo-cleaner/main/screenshots/dashboard.png</image>
+    </screenshot>
+  </screenshots>
+  
+  <url type="homepage">https://github.com/paladini/echo-cleaner</url>
+  <url type="bugtracker">https://github.com/paladini/echo-cleaner/issues</url>
+  <url type="help">https://github.com/paladini/echo-cleaner#readme</url>
+  <url type="vcs-browser">https://github.com/paladini/echo-cleaner</url>
+  
+  <developer_name>Fernando Paladini</developer_name>
+  <update_contact>fnpaladini@gmail.com</update_contact>
+  
+  <provides>
+    <binary>echo-cleaner</binary>
+  </provides>
+  
+  <releases>
+    <release version="1.2.0" date="2025-10-20">
+      <description>
+        <p>Enhanced UI/UX with Smart Interactions</p>
+        <ul>
+          <li>Added contextual interface that adapts to user actions</li>
+          <li>Implemented smart selection badges with hover feedback</li>
+          <li>Beautiful empty states when categories are clean</li>
+          <li>Improved visual design with gradients and state-based styling</li>
+          <li>Fixed badge size display and hover effects</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.1.0" date="2025-10-19">
+      <description>
+        <p>Branding and Core Improvements</p>
+        <ul>
+          <li>Updated branding from "Echo Clear" to "Echo Cleaner"</li>
+          <li>New high-quality PNG logo with High DPI support</li>
+          <li>Fixed Package Manager and Docker cleaning operations</li>
+          <li>Implemented auto-rescan after cleaning</li>
+        </ul>
+      </description>
+    </release>
+    <release version="1.0.0" date="2025-10-12">
+      <description>
+        <p>Initial release</p>
+        <ul>
+          <li>System cache cleaning</li>
+          <li>Docker and Kubernetes cleanup modules</li>
+          <li>Development dependencies management</li>
+          <li>Beautiful Qt-based interface</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+  
+  <content_rating type="oars-1.1" />
+  
+  <categories>
+    <category>System</category>
+    <category>Utility</category>
+  </categories>
+  
+  <keywords>
+    <keyword>clean</keyword>
+    <keyword>cleaner</keyword>
+    <keyword>cache</keyword>
+    <keyword>disk</keyword>
+    <keyword>space</keyword>
+    <keyword>docker</keyword>
+    <keyword>kubernetes</keyword>
+    <keyword>developer</keyword>
+  </keywords>
+  
+  <custom>
+    <value key="GnomeSoftware::popular-background">https://raw.githubusercontent.com/paladini/echo-cleaner/main/screenshots/banner.png</value>
+  </custom>
+</component>

@@ -1,0 +1,20 @@
+[Desktop Entry]
+Version=1.5
+Type=Application
+Name=Echo Cleaner
+GenericName=System Cleaner
+Comment=Intelligent disk space cleaner for Linux with developer tools support
+# Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
+Keywords=clean;cleaner;cache;disk;space;docker;kubernetes;system;optimize;
+
+Exec=echo-cleaner
+Icon=EchoCleaner
+Terminal=false
+
+Categories=System;Utility;
+StartupNotify=true
+StartupWMClass=echo-cleaner
+
+# Additional metadata
+X-GNOME-UsesNotifications=true
+X-KDE-SubstituteUID=false

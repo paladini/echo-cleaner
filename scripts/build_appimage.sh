@@ -22,9 +22,10 @@ echo -e "${BLUE}╚════════════════════�
 
 # Variáveis
 APP_NAME="EchoCleaner"
+APP_ID="io.github.paladini.EchoCleaner"
 APP_DIR="build/${APP_NAME}.AppDir"
 VERSION=$(grep '^version = ' pyproject.toml | cut -d'"' -f2 2>/dev/null || echo "0.2.0")
-OUTPUT_NAME="${APP_NAME}-x86_64.AppImage"
+OUTPUT_NAME="dist/${APP_NAME}-${VERSION}-x86_64.AppImage"
 
 # Verificar se appimagetool existe, se não, baixar automaticamente
 APPIMAGETOOL="tools/appimagetool-x86_64.AppImage"
@@ -79,38 +80,26 @@ chmod +x "${APP_DIR}/usr/bin/${APP_NAME}"
 
 # Copiar/criar arquivo .desktop
 echo -e "${YELLOW}Step 4: Setting up desktop entry...${NC}"
-cat > "${APP_DIR}/${APP_NAME}.desktop" << 'EOFDESKTOP'
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Echo Cleaner
-Comment=Intelligent System Cleaner for Linux
-Exec=EchoCleaner
-Icon=EchoCleaner
-Terminal=false
-Categories=System;
-Keywords=clean;cleaner;cache;disk;space;docker;
-StartupNotify=true
-EOFDESKTOP
+cp "data/${APP_ID}.desktop" "${APP_DIR}/${APP_NAME}.desktop"
 
 # Copiar para usr/share/applications também
 cp "${APP_DIR}/${APP_NAME}.desktop" "${APP_DIR}/usr/share/applications/"
 
 # Criar ícone (PNG simples se não existir)
 echo -e "${YELLOW}Step 5: Setting up icon...${NC}"
-if [ -f "app/assets/icon.png" ]; then
-    cp app/assets/icon.png "${APP_DIR}/${APP_NAME}.png"
-    cp app/assets/icon.png "${APP_DIR}/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
+if [ -f "data/icons/hicolor/256x256/apps/${APP_ID}.png" ]; then
+    cp "data/icons/hicolor/256x256/apps/${APP_ID}.png" "${APP_DIR}/${APP_NAME}.png"
+    cp "data/icons/hicolor/256x256/apps/${APP_ID}.png" "${APP_DIR}/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
+    # Copiar também o ícone com o ID correto para conformidade
+    cp "data/icons/hicolor/256x256/apps/${APP_ID}.png" "${APP_DIR}/usr/share/icons/hicolor/256x256/apps/${APP_ID}.png"
 else
-    # Criar um ícone placeholder se não existir
-    echo -e "${YELLOW}Warning: No icon found, creating placeholder...${NC}"
-    # Usar ImageMagick se disponível
-    if command -v convert &> /dev/null; then
-        convert -size 256x256 xc:blue -pointsize 72 -fill white -gravity center \
-                -annotate +0+0 "EC" "${APP_DIR}/${APP_NAME}.png"
-        cp "${APP_DIR}/${APP_NAME}.png" "${APP_DIR}/usr/share/icons/hicolor/256x256/apps/"
+    echo -e "${YELLOW}Warning: Icon not found at data/icons/hicolor/256x256/apps/${APP_ID}.png${NC}"
+    # Fallback para app/assets/icon.png se existir
+    if [ -f "app/assets/icon.png" ]; then
+        cp app/assets/icon.png "${APP_DIR}/${APP_NAME}.png"
+        cp app/assets/icon.png "${APP_DIR}/usr/share/icons/hicolor/256x256/apps/${APP_NAME}.png"
     else
-        echo -e "${RED}ImageMagick not found, skipping icon creation${NC}"
+        echo -e "${RED}No icon found, AppImage may not have an icon${NC}"
     fi
 fi
 
@@ -149,8 +138,18 @@ EOFAPPRUN
 
 chmod +x "${APP_DIR}/AppRun"
 
+# Copiar metainfo se existir
+if [ -f "data/${APP_ID}.metainfo.xml" ]; then
+    echo -e "${YELLOW}Step 7: Adding AppStream metadata...${NC}"
+    mkdir -p "${APP_DIR}/usr/share/metainfo"
+    cp "data/${APP_ID}.metainfo.xml" "${APP_DIR}/usr/share/metainfo/"
+fi
+
 # Criar AppImage
-echo -e "${YELLOW}Step 7: Building AppImage...${NC}"
+echo -e "${YELLOW}Step 8: Building AppImage...${NC}"
+
+# Garantir que o diretório dist existe
+mkdir -p dist
 
 # Remover AppImage anterior se existir
 if [ -f "${OUTPUT_NAME}" ]; then
@@ -163,8 +162,14 @@ ARCH=x86_64 "$APPIMAGETOOL" "${APP_DIR}" "${OUTPUT_NAME}"
 
 if [ -f "${OUTPUT_NAME}" ]; then
     chmod +x "${OUTPUT_NAME}"
-    echo -e "\n${GREEN}Success! AppImage created: ${OUTPUT_NAME}${NC}"
-    echo -e "${GREEN}Size: $(du -h "${OUTPUT_NAME}" | cut -f1)${NC}"
+    
+    # Gerar checksum automaticamente
+    echo -e "\n${YELLOW}Generating SHA256 checksum...${NC}"
+    sha256sum "${OUTPUT_NAME}" > "${OUTPUT_NAME}.sha256"
+    
+    echo -e "\n${GREEN}✓ Success! AppImage created: ${OUTPUT_NAME}${NC}"
+    echo -e "${GREEN}✓ Size: $(du -h "${OUTPUT_NAME}" | cut -f1)${NC}"
+    echo -e "${GREEN}✓ Checksum: ${OUTPUT_NAME}.sha256${NC}"
     echo -e "\n${YELLOW}To run it:${NC}"
     echo -e "  ./${OUTPUT_NAME}"
     echo -e "\n${YELLOW}To install system-wide:${NC}"
