@@ -8,7 +8,8 @@ from typing import List, Dict
 from PySide6.QtWidgets import (
     QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
     QPushButton, QLabel, QListWidget, QListWidgetItem,
-    QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea, QApplication
+    QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea, QApplication,
+    QSizePolicy
 )
 from PySide6.QtCore import Qt, Signal, QEvent
 from PySide6.QtGui import QFont, QPixmap
@@ -207,9 +208,11 @@ class MainWindow(QMainWindow):
         """Create the header with title and action buttons"""
         header = QFrame()
         header.setObjectName("header")
+        header.setFixedHeight(75)  # Fixed height to prevent jumping
         
         layout = QHBoxLayout(header)
         layout.setContentsMargins(0, 0, 0, 0)
+        layout.setAlignment(Qt.AlignVCenter)  # Center items vertically
         
         # Title
         self.page_title = QLabel("Dashboard")
@@ -222,6 +225,7 @@ class MainWindow(QMainWindow):
         self.header_selection_badge = QLabel("")
         self.header_selection_badge.setObjectName("headerSelectionBadge")
         self.header_selection_badge.setVisible(False)
+        self.header_selection_badge.setMinimumHeight(36)  # Minimum height, can grow if needed
         badge_font = QFont("Inter", 11, QFont.Medium)
         self.header_selection_badge.setFont(badge_font)
         layout.addWidget(self.header_selection_badge)
@@ -231,7 +235,8 @@ class MainWindow(QMainWindow):
         # Scan button (visible only on Dashboard)
         self.scan_button = QPushButton("🔍 Scan System")
         self.scan_button.setObjectName("scanButton")
-        self.scan_button.setMinimumSize(160, 50)
+        self.scan_button.setMinimumHeight(48)  # Minimum height, can grow if needed
+        self.scan_button.setMinimumWidth(170)  # Minimum width for text
         scan_font = QFont("Inter", 13, QFont.Medium)
         self.scan_button.setFont(scan_font)
         self.scan_button.setCursor(Qt.PointingHandCursor)
@@ -241,7 +246,8 @@ class MainWindow(QMainWindow):
         # Clean button for category pages (starts hidden)
         self.header_clean_button = QPushButton("🧹 Clean Selected")
         self.header_clean_button.setObjectName("headerCleanButton")
-        self.header_clean_button.setMinimumSize(160, 50)
+        self.header_clean_button.setMinimumHeight(48)  # Minimum height, can grow if needed
+        self.header_clean_button.setMinimumWidth(190)  # Minimum width for text
         clean_font = QFont("Inter", 13, QFont.Medium)
         self.header_clean_button.setFont(clean_font)
         self.header_clean_button.setCursor(Qt.PointingHandCursor)
@@ -645,10 +651,9 @@ class MainWindow(QMainWindow):
                 color: white;
                 border: none;
                 border-radius: 14px;
-                padding: 8px 16px;
+                padding: 10px 18px;
                 font-weight: 600;
                 text-align: left;
-                min-height: 32px;
             }
             
             QPushButton[objectName^="selectionBadge_"]:hover {
@@ -904,7 +909,10 @@ class MainWindow(QMainWindow):
         header_layout = QHBoxLayout()
         header_widget = QWidget()
         header_widget.setObjectName(f"itemsHeader_{category_name}")
+        header_widget.setFixedHeight(55)  # Fixed height to prevent jumping
         header_widget.setLayout(header_layout)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        header_layout.setAlignment(Qt.AlignVCenter)  # Center items vertically
         
         # Title
         items_label = QLabel("Items to Clean")
@@ -921,6 +929,8 @@ class MainWindow(QMainWindow):
         selection_badge.setAutoDefault(False)
         selection_badge.setDefault(False)
         selection_badge.setFocusPolicy(Qt.NoFocus)  # Remove focus rectangle
+        selection_badge.setMinimumWidth(160)  # Wide enough for "☐ Deselect All"
+        selection_badge.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Preferred)  # Fixed width, flexible height
         badge_font = QFont("Inter", 11, QFont.Medium)
         selection_badge.setFont(badge_font)
         selection_badge.clicked.connect(lambda: self.toggle_select_all(category_name))
@@ -1382,12 +1392,10 @@ class MainWindow(QMainWindow):
             
             selection_badge.setVisible(True)
             
-            # Force widget update
-            selection_badge.adjustSize()
+            # Force style update without resizing
             selection_badge.style().unpolish(selection_badge)
             selection_badge.style().polish(selection_badge)
             selection_badge.update()
-            QApplication.processEvents()
     
     def update_selection_summary(self):
         """Update the selection summary on dashboard"""
@@ -1556,7 +1564,7 @@ class MainWindow(QMainWindow):
             total_items = obj.property("totalItems") or 0
             
             if event.type() == QEvent.Enter:  # Mouse enters
-                # Change text to show action on hover with smooth update
+                # Change text to show action on hover
                 if state == "all":
                     obj.setText("☐ Deselect All")
                 elif state == "none":
@@ -1564,13 +1572,12 @@ class MainWindow(QMainWindow):
                 elif state == "partial":
                     obj.setText("☐ Deselect All")
                 
-                # Force style update for smooth transition
+                # Update style only, no resize
                 obj.style().unpolish(obj)
                 obj.style().polish(obj)
-                obj.update()
                     
             elif event.type() == QEvent.Leave:  # Mouse leaves
-                # Restore original text with smooth update
+                # Restore original text
                 if state == "all":
                     obj.setText("✓ All selected")
                 elif state == "none":
@@ -1578,10 +1585,9 @@ class MainWindow(QMainWindow):
                 elif state == "partial":
                     obj.setText(f"✓ {selected_count}/{total_items} selected")
                 
-                # Force style update for smooth transition
+                # Update style only, no resize
                 obj.style().unpolish(obj)
                 obj.style().polish(obj)
-                obj.update()
         
         # Call base class implementation
         return super().eventFilter(obj, event)
