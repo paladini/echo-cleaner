@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
     QPushButton, QLabel, QListWidget, QListWidgetItem,
     QFrame, QProgressBar, QStackedWidget, QCheckBox, QScrollArea, QApplication
 )
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt, Signal, QEvent
 from PySide6.QtGui import QFont, QPixmap
 from .subcategory_widget import SubcategoryGroupWidget, ItemCheckboxWidget
 from services.subcategory_service import SubcategoryService
@@ -55,6 +55,10 @@ class MainWindow(QMainWindow):
         # Right content area
         self.content_area = self.create_content_area()
         main_layout.addWidget(self.content_area, 1)
+        
+        # Ensure clean button is hidden on Dashboard at startup
+        if hasattr(self, 'header_clean_button'):
+            self.header_clean_button.setVisible(False)
         
         # Center window on screen
         self.center_on_screen()
@@ -155,7 +159,7 @@ class MainWindow(QMainWindow):
         layout.addSpacing(10)
         
         # Version info
-        version = QLabel("v1.1.0")
+        version = QLabel("v1.2.0")
         version.setObjectName("versionLabel")
         version_font = QFont("Inter", 9)
         version.setFont(version_font)
@@ -234,14 +238,14 @@ class MainWindow(QMainWindow):
         self.scan_button.clicked.connect(self.scan_requested.emit)
         layout.addWidget(self.scan_button)
         
-        # Clean button for category pages (hidden by default)
+        # Clean button for category pages (starts hidden)
         self.header_clean_button = QPushButton("🧹 Clean Selected")
         self.header_clean_button.setObjectName("headerCleanButton")
         self.header_clean_button.setMinimumSize(160, 50)
         clean_font = QFont("Inter", 13, QFont.Medium)
         self.header_clean_button.setFont(clean_font)
         self.header_clean_button.setCursor(Qt.PointingHandCursor)
-        self.header_clean_button.setVisible(False)
+        self.header_clean_button.setVisible(False)  # Start hidden on Dashboard
         self.header_clean_button.clicked.connect(self.on_header_clean_clicked)
         layout.addWidget(self.header_clean_button)
         
@@ -634,23 +638,53 @@ class MainWindow(QMainWindow):
                 image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOSIgdmlld0JveD0iMCAwIDEyIDkiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xIDQuNUw0LjUgOEwxMSAxIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPgo8L3N2Zz4K);
             }
             
-            QPushButton[objectName^="selectAllBtn_"] {
-                background-color: #f5f5f7;
-                color: #007aff;
-                border: 1px solid #e5e5e7;
-                border-radius: 8px;
+            /* Clickable selection badges - elegant green style with smooth transitions */
+            QPushButton[objectName^="selectionBadge_"] {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #34C759, stop:1 #30B350);
+                color: white;
+                border: none;
+                border-radius: 14px;
                 padding: 8px 16px;
-                font-size: 11px;
                 font-weight: 600;
+                text-align: left;
+                min-height: 32px;
             }
             
-            QPushButton[objectName^="selectAllBtn_"]:hover {
-                background-color: #e8e8ed;
-                border-color: #007aff;
+            QPushButton[objectName^="selectionBadge_"]:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #28A745, stop:1 #259D3F);
             }
             
-            QPushButton[objectName^="selectAllBtn_"]:pressed {
-                background-color: #d2d2d7;
+            QPushButton[objectName^="selectionBadge_"]:pressed {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #1F8A37, stop:1 #1C7D32);
+            }
+            
+            /* Different states for visual feedback */
+            QPushButton[objectName^="selectionBadge_"][selectionState="none"] {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #F8F9FA, stop:1 #E9ECEF);
+                color: #34C759;
+                border: 2px solid #34C759;
+            }
+            
+            QPushButton[objectName^="selectionBadge_"][selectionState="none"]:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #34C759, stop:1 #30B350);
+                color: white;
+                border: 2px solid #34C759;
+            }
+            
+            QPushButton[objectName^="selectionBadge_"][selectionState="partial"] {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #007AFF, stop:1 #0051D5);
+                color: white;
+            }
+            
+            QPushButton[objectName^="selectionBadge_"][selectionState="partial"]:hover {
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #0051D5, stop:1 #004AB8);
             }
             
             /* Dashboard */
@@ -782,6 +816,20 @@ class MainWindow(QMainWindow):
                 color: #86868b;
                 line-height: 1.5;
             }
+            
+            /* Empty State */
+            #emptyStateIcon {
+                color: #86868b;
+            }
+            
+            #emptyStateTitle {
+                color: #1d1d1f;
+            }
+            
+            #emptyStateMessage {
+                color: #6e6e73;
+                line-height: 1.6;
+            }
         """)
     
     def center_on_screen(self):
@@ -820,14 +868,18 @@ class MainWindow(QMainWindow):
             # Show/hide appropriate header button based on page
             if index == 0:  # Dashboard
                 self.scan_button.setVisible(True)
-                self.header_clean_button.setVisible(False)
+                self.header_clean_button.setVisible(False)  # Hide on dashboard
+                self.header_selection_badge.setVisible(False)  # Hide badge on dashboard
             elif index == 8:  # About page
                 self.scan_button.setVisible(False)
-                self.header_clean_button.setVisible(False)
+                self.header_clean_button.setVisible(False)  # Hide on about
+                self.header_selection_badge.setVisible(False)  # Hide badge on about
             else:  # Category pages
                 self.scan_button.setVisible(False)
                 # Clean button visibility will be updated by update_category_clean_buttons()
                 self.update_header_clean_button_visibility()
+                # Badge visibility will be updated by update_header_selection_badge()
+                self.update_header_selection_badge()
     
     def create_category_view(self, category_name):
         """Create a category detail view"""
@@ -848,8 +900,11 @@ class MainWindow(QMainWindow):
         
         layout.addSpacing(10)
         
-        # Header with title, selection badge and button
+        # Header with title and clickable selection badge
         header_layout = QHBoxLayout()
+        header_widget = QWidget()
+        header_widget.setObjectName(f"itemsHeader_{category_name}")
+        header_widget.setLayout(header_layout)
         
         # Title
         items_label = QLabel("Items to Clean")
@@ -858,25 +913,26 @@ class MainWindow(QMainWindow):
         items_label.setFont(items_label_font)
         header_layout.addWidget(items_label)
         
-        # Selection status badge
-        selection_badge = QLabel("")
+        # Clickable selection status badge (replaces Select All button)
+        selection_badge = QPushButton("")
         selection_badge.setObjectName(f"selectionBadge_{category_name}")
         selection_badge.setVisible(False)
+        selection_badge.setCursor(Qt.PointingHandCursor)
+        selection_badge.setAutoDefault(False)
+        selection_badge.setDefault(False)
+        selection_badge.setFocusPolicy(Qt.NoFocus)  # Remove focus rectangle
         badge_font = QFont("Inter", 11, QFont.Medium)
         selection_badge.setFont(badge_font)
+        selection_badge.clicked.connect(lambda: self.toggle_select_all(category_name))
+        
+        # Install event filter for hover text change
+        selection_badge.installEventFilter(self)
+        
         header_layout.addWidget(selection_badge)
         
         header_layout.addStretch()
         
-        # Select All / Deselect All button
-        select_all_btn = QPushButton("Select All")
-        select_all_btn.setObjectName(f"selectAllBtn_{category_name}")
-        select_all_btn.setMinimumSize(140, 38)
-        select_all_btn.setCursor(Qt.PointingHandCursor)
-        select_all_btn.clicked.connect(lambda: self.toggle_select_all(category_name))
-        header_layout.addWidget(select_all_btn)
-        
-        layout.addLayout(header_layout)
+        layout.addWidget(header_widget)
         
         # Scroll area for items
         scroll_area = QScrollArea()
@@ -897,12 +953,41 @@ class MainWindow(QMainWindow):
         scroll_area.setWidget(items_container)
         layout.addWidget(scroll_area, 1)
         
-        # Info label
-        info_label = QLabel("Run a scan to see items in this category")
-        info_label.setObjectName(f"infoLabel_{category_name}")
-        info_font = QFont("Inter", 10)
-        info_label.setFont(info_font)
-        layout.addWidget(info_label)
+        # Empty state widget (hidden by default, shown when no items)
+        empty_state = QWidget()
+        empty_state.setObjectName(f"emptyState_{category_name}")
+        empty_state.setVisible(False)
+        empty_state_layout = QVBoxLayout(empty_state)
+        empty_state_layout.setContentsMargins(40, 60, 40, 60)
+        empty_state_layout.setSpacing(15)
+        empty_state_layout.setAlignment(Qt.AlignCenter)
+        
+        # Icon
+        empty_icon = QLabel("✨")
+        empty_icon.setObjectName("emptyStateIcon")
+        empty_icon.setAlignment(Qt.AlignCenter)
+        empty_icon_font = QFont("Inter", 48)
+        empty_icon.setFont(empty_icon_font)
+        empty_state_layout.addWidget(empty_icon)
+        
+        # Title
+        empty_title = QLabel("All Clean!")
+        empty_title.setObjectName("emptyStateTitle")
+        empty_title.setAlignment(Qt.AlignCenter)
+        empty_title_font = QFont("Inter", 18, QFont.Bold)
+        empty_title.setFont(empty_title_font)
+        empty_state_layout.addWidget(empty_title)
+        
+        # Message
+        empty_message = QLabel("No items found in this category.\nYour system is already optimized here.")
+        empty_message.setObjectName("emptyStateMessage")
+        empty_message.setAlignment(Qt.AlignCenter)
+        empty_message.setWordWrap(True)
+        empty_message_font = QFont("Inter", 12)
+        empty_message.setFont(empty_message_font)
+        empty_state_layout.addWidget(empty_message)
+        
+        layout.addWidget(empty_state)
         
         return view
     
@@ -923,7 +1008,7 @@ class MainWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         
         # Versão
-        version_label = QLabel("Version 1.1.0")
+        version_label = QLabel("Version 1.2.0")
         version_label.setObjectName("aboutVersion")
         version_label.setAlignment(Qt.AlignCenter)
         version_font = QFont("Inter", 12)
@@ -1074,7 +1159,9 @@ class MainWindow(QMainWindow):
         
         view = self.category_views[category_name]
         items_container = view.findChild(QWidget, f"itemsContainer_{category_name}")
-        info_label = view.findChild(QLabel, f"infoLabel_{category_name}")
+        empty_state = view.findChild(QWidget, f"emptyState_{category_name}")
+        scroll_area = view.findChild(QScrollArea, f"scrollArea_{category_name}")
+        items_header = view.findChild(QWidget, f"itemsHeader_{category_name}")
         
         if not items_container:
             return
@@ -1091,14 +1178,26 @@ class MainWindow(QMainWindow):
             self.selected_items[category_name] = {}
         
         if not items:
-            info_label.setText("✓ No items found - this category is clean!")
-            info_label.setVisible(True)
+            # Show empty state, hide items container and header
+            if empty_state:
+                empty_state.setVisible(True)
+            if scroll_area:
+                scroll_area.setVisible(False)
+            if items_header:
+                items_header.setVisible(False)
+            
             # Hide badge when no items
-            selection_badge = view.findChild(QLabel, f"selectionBadge_{category_name}")
+            selection_badge = view.findChild(QPushButton, f"selectionBadge_{category_name}")
             if selection_badge:
                 selection_badge.setVisible(False)
         else:
-            info_label.setVisible(False)
+            # Hide empty state, show items container and header
+            if empty_state:
+                empty_state.setVisible(False)
+            if scroll_area:
+                scroll_area.setVisible(True)
+            if items_header:
+                items_header.setVisible(True)
             
             # Check if items have subcategories using the service
             if self.subcategory_service.has_subcategories(items):
@@ -1240,7 +1339,7 @@ class MainWindow(QMainWindow):
         self.update_selection_summary()
     
     def update_category_selection_visuals(self, category_name):
-        """Update button text and badge for a specific category"""
+        """Update clickable badge for a specific category"""
         if category_name not in self.selected_items or category_name not in self.category_views:
             return
         
@@ -1256,65 +1355,39 @@ class MainWindow(QMainWindow):
             if item['selected']
         )
         
-        # Update button text
-        select_all_btn = view.findChild(QPushButton, f"selectAllBtn_{category_name}")
-        if select_all_btn:
-            if selected_count == total_items:
-                select_all_btn.setText("☑️ Deselect All")
-            elif selected_count == 0:
-                select_all_btn.setText("☐ Select All")
-            else:
-                select_all_btn.setText("☑️ Deselect All")  # Default action when partial
-        
-        # Update selection badge
-        selection_badge = view.findChild(QLabel, f"selectionBadge_{category_name}")
+        # Update clickable selection badge (now a button)
+        selection_badge = view.findChild(QPushButton, f"selectionBadge_{category_name}")
         if selection_badge:
-            # Always update badge visibility and content
-            if selected_count == total_items:
-                # All selected - green badge
-                selection_badge.setText("✓ All selected")
-                selection_badge.setStyleSheet("""
-                    QLabel {
-                        background-color: #34C759;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-weight: 500;
-                    }
-                """)
-                selection_badge.setVisible(True)
-            elif selected_count == 0:
-                # None selected - gray badge
-                selection_badge.setText("None selected")
-                selection_badge.setStyleSheet("""
-                    QLabel {
-                        background-color: #8E8E93;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-weight: 500;
-                    }
-                """)
-                selection_badge.setVisible(True)
-            else:
-                # Partial selection - blue badge
-                selection_badge.setText(f"{selected_count}/{total_items} selected")
-                selection_badge.setStyleSheet("""
-                    QLabel {
-                        background-color: #007AFF;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 12px;
-                        font-weight: 500;
-                    }
-                """)
-                selection_badge.setVisible(True)
+            # Store state as property for hover effect
+            selection_badge.setProperty("selectionState", 
+                "all" if selected_count == total_items 
+                else "none" if selected_count == 0 
+                else "partial")
+            selection_badge.setProperty("selectedCount", selected_count)
+            selection_badge.setProperty("totalItems", total_items)
             
-            # Force widget update with proper size recalculation
-            selection_badge.adjustSize()  # Recalculate size based on new text
+            # Set text based on state
+            if selected_count == total_items:
+                # All selected - show "All selected" normally, "Deselect All" on hover
+                selection_badge.setText("✓ All selected")
+                selection_badge.setToolTip("Click to deselect all items")
+            elif selected_count == 0:
+                # None selected - show "Select All"
+                selection_badge.setText("☐ Select All")
+                selection_badge.setToolTip("Click to select all items")
+            else:
+                # Partial selection - show count, "Deselect All" on hover
+                selection_badge.setText(f"✓ {selected_count}/{total_items} selected")
+                selection_badge.setToolTip("Click to deselect all items")
+            
+            selection_badge.setVisible(True)
+            
+            # Force widget update
+            selection_badge.adjustSize()
+            selection_badge.style().unpolish(selection_badge)
+            selection_badge.style().polish(selection_badge)
             selection_badge.update()
-            selection_badge.repaint()
-            QApplication.processEvents()  # Process all pending events
+            QApplication.processEvents()
     
     def update_selection_summary(self):
         """Update the selection summary on dashboard"""
@@ -1345,6 +1418,12 @@ class MainWindow(QMainWindow):
     
     def update_header_selection_badge(self):
         """Update the header selection badge with selected items summary"""
+        # Don't show badge on Dashboard (index 0) or About (index 8)
+        current_index = self.stacked_widget.currentIndex()
+        if current_index == 0 or current_index == 8:
+            self.header_selection_badge.setVisible(False)
+            return
+        
         total_items = 0
         selected_items = 0
         selected_size = 0
@@ -1467,3 +1546,42 @@ class MainWindow(QMainWindow):
     def store_scan_results(self, results):
         """Store scan results for later use"""
         self.scan_results = results
+    
+    def eventFilter(self, obj, event):
+        """Event filter for hover effects on selection badges"""
+        # Check if this is a selection badge button
+        if isinstance(obj, QPushButton) and obj.objectName().startswith("selectionBadge_"):
+            state = obj.property("selectionState")
+            selected_count = obj.property("selectedCount") or 0
+            total_items = obj.property("totalItems") or 0
+            
+            if event.type() == QEvent.Enter:  # Mouse enters
+                # Change text to show action on hover with smooth update
+                if state == "all":
+                    obj.setText("☐ Deselect All")
+                elif state == "none":
+                    obj.setText("☑️ Select All")
+                elif state == "partial":
+                    obj.setText("☐ Deselect All")
+                
+                # Force style update for smooth transition
+                obj.style().unpolish(obj)
+                obj.style().polish(obj)
+                obj.update()
+                    
+            elif event.type() == QEvent.Leave:  # Mouse leaves
+                # Restore original text with smooth update
+                if state == "all":
+                    obj.setText("✓ All selected")
+                elif state == "none":
+                    obj.setText("☐ Select All")
+                elif state == "partial":
+                    obj.setText(f"✓ {selected_count}/{total_items} selected")
+                
+                # Force style update for smooth transition
+                obj.style().unpolish(obj)
+                obj.style().polish(obj)
+                obj.update()
+        
+        # Call base class implementation
+        return super().eventFilter(obj, event)

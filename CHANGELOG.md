@@ -5,6 +5,41 @@ All notable changes to Echo Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-10-20
+
+### Added
+- ✨ **Empty State UI**: Beautiful "All Clean!" message when categories have no items to clean
+- 🎨 **Contextual Header Buttons**: "Scan System" on Dashboard, "Clean Selected" on category pages
+- 🏷️ **Smart Selection Badge**: Shows "✓ X selected • YYY MB" in header on category pages
+- 🖱️ **Clickable Category Badges**: Click "All Selected" badge to toggle all items in a category
+- 🔄 **Hover Text Feedback**: Badge changes text on hover ("All selected" → "Deselect All")
+- 📱 **Adaptive UI**: Headers and badges automatically hide when categories are empty
+
+### Changed
+- 🎯 **Removed Clutter**: Eliminated awkward "deselect all" toggle button from dashboard
+- 🎨 **Improved Badge Design**: Elegant gradients with state-based colors (green/blue for different states)
+- 📐 **Better Layout**: Contextual elements appear only when needed
+- ⚡ **Smoother Interactions**: Enhanced hover effects and visual feedback
+- 🖼️ **Empty State Design**: Centered layout with emoji icon, title, and friendly message
+
+### Fixed
+- 🐛 **Badge Size Display**: Fixed "0 Bytes" showing in selection badge
+- 🐛 **Broom Emoji on Dashboard**: Removed unwanted icon appearing after first scan
+- 🐛 **Hover Effects**: Improved badge hover states with proper styling
+
+### UI/UX Improvements
+- 🎭 **State-Based Styling**: Different colors for "all selected", "none selected", and "partial selection"
+- 💚 **Green Theme**: Primary actions use elegant green gradients (#34C759 → #30B350)
+- 💙 **Blue Accent**: Partial selections use blue gradient for visual distinction
+- 🎯 **Intuitive Interactions**: All actions have clear visual feedback
+- 📦 **Hidden Elements**: Selection controls hide on empty categories and Dashboard/About pages
+
+### Technical
+- 🏗️ **Component Refactoring**: Improved separation of concerns in UI code
+- 🔧 **Event Handling**: Enhanced hover and click event management
+- 📊 **State Management**: Better tracking of selection states across categories
+- 🎨 **CSS Organization**: Cleaner stylesheet structure with state selectors
+
 ## [1.1.0] - 2025-10-19
 
 ### Added
@@ -61,5 +96,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ⚡ **Fast & Efficient**: Background processing
 - 🐳 **Developer-Friendly**: Cleans Docker, K8s, and language caches
 
+[1.2.0]: https://github.com/paladini/echo-cleaner/releases/tag/v1.2.0
 [1.1.0]: https://github.com/paladini/echo-cleaner/releases/tag/v1.1.0
 [1.0.0]: https://github.com/paladini/echo-cleaner/releases/tag/v1.0.0
