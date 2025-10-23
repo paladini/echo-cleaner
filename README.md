@@ -1,5 +1,7 @@
 # Echo Cleaner 🧹
 
+![Dashboard Page - Scan Stats](docs/screenshots/dashboard.jpeg)
+
 <p align="center">
   <strong>Intelligent System Cleaner for Linux</strong>
 </p>

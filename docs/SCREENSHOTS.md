@@ -2,37 +2,33 @@
 
 ## Main Dashboard
 
-![Echo Cleaner Dashboard](screenshots/dashboard.png)
+![Echo Cleaner Dashboard](screenshots/dashboard.jpeg)
 
 *The main dashboard showing scan results with statistics cards*
 
-## Scanning in Progress
+## Scan Complete
 
-![Scanning System](screenshots/scanning.png)
-
-*Real-time progress bar during system scan*
-
-## Scan Results
-
-![Scan Complete](screenshots/scan-results.png)
+![Scan Complete](screenshots/scan-complete.jpeg)
 
 *Dashboard after completing a scan, showing reclaimable space*
 
-## Cleaning Confirmation
+## Category: Dev Dependencies
 
-![Cleaning Confirmation](screenshots/confirmation.png)
+![Cleaning Confirmation](screenshots/window-dev-dependencies-category.jpeg)
 
-*Confirmation dialog before cleaning operations*
+*Dev Dependencies cleaning section*
 
-## Cleaning Complete
+## Category: System 
 
-![Cleaning Success](screenshots/success.png)
+![System Cache](screenshots/window-system-cache-category.jpeg)
 
-*Success message showing cleaned space*
+*System Cache Category Page*
 
----
+## About
 
-**Note**: Screenshots will be added in future releases. The application features a beautiful, minimalist UI inspired by Apple's design philosophy.
+![About](screenshots/about.jpeg)
+
+*About page with version and details about this project*
 
 ## UI Features
 
