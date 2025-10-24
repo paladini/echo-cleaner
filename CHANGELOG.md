@@ -5,6 +5,28 @@ All notable changes to Echo Cleaner will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-10-23
+
+### Added
+- 🏗️ **SelectionManager Component**: New dedicated class for managing item selection state (SOLID principles)
+- 🛠️ **UI Utilities Module**: Extracted common formatting functions (format_size, format_count)
+- 📦 **Better Code Organization**: Separated concerns following Single Responsibility Principle
+
+### Changed
+- ♻️ **Code Refactoring**: Reduced code duplication by extracting selection logic
+- 🎯 **Simplified Methods**: Extracted large methods into smaller, focused helper methods
+- 📐 **Cleaner Architecture**: UI logic separated from business logic
+
+### Fixed
+- 🐛 **Dashboard Clean Button**: Fixed clean button and selection summary not appearing on dashboard
+- 🐛 **Selection Visibility**: Selection label now properly shows/hides based on selected items
+- ✨ **Better State Management**: More consistent selection state across components
+
+### Technical Improvements
+- 📊 **Reduced Complexity**: MainWindow reduced from 1594 to 1580 lines
+- 🧩 **Modular Design**: Selection logic now reusable and testable independently
+- 🔧 **Maintainability**: Easier to understand and modify individual components
+
 ## [1.2.0] - 2025-10-20
 
 ### Added

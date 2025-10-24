@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         layout.addSpacing(10)
         
         # Version info
-        version = QLabel("v1.2.0")
+        version = QLabel("v1.3.0")
         version.setObjectName("versionLabel")
         version_font = QFont("Inter", 9)
         version.setFont(version_font)
@@ -1019,7 +1019,7 @@ class MainWindow(QMainWindow):
         layout.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
         
         # Versão
-        version_label = QLabel("Version 1.2.0")
+        version_label = QLabel("Version 1.3.0")
         version_label.setObjectName("aboutVersion")
         version_label.setAlignment(Qt.AlignCenter)
         version_font = QFont("Inter", 12)
